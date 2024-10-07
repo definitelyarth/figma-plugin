@@ -1,0 +1,6 @@
+- take nodes out of groups
+- take nodes out of frames and make sure to set children positions relative to the root frame not the relative frame.
+- images - take them out of fills and put on the frame.
+- z-indexes?
+- Border left
+- text styles - border, effects
