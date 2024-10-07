@@ -28,7 +28,7 @@
       "figma"
     ],
     "id": "",
-    "name": ".",
+    "name": "Figma.to.Rocketium | Export figma assets in .Rktm",
     "main": "src/main.ts",
     "ui": "src/ui.tsx"
   }

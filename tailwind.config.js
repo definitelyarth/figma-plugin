@@ -5,6 +5,8 @@ export default {
     extend: {
       colors: {
         brand: "#8A3FFC",
+        lightGray: "#667085",
+        lighterGray: "##D0D5DD",
       },
     },
   },

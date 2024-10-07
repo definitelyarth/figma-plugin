@@ -5,6 +5,7 @@ import { emit } from "@create-figma-plugin/utilities";
 import { useEffect, useState } from "preact/hooks";
 import { VariantClusters } from "./types";
 import MainUI from "./ui/index";
+import { ScreenContextProvider } from "./contexts/ScreenContext";
 
 function Plugin() {
   const [data, setData] = useState<undefined | { variants: VariantClusters }>();
@@ -28,17 +29,9 @@ function Plugin() {
     //     "flex flex-col gap-2 items-center justify-center w-full min-h-full overflow-scroll p-4"
     //   }
     // >
-    <div>
+    <ScreenContextProvider>
       <MainUI />
-      <button
-        class={`bg-red-400 text-white rounded-md p-4`}
-        onClick={(e) => {
-          emit("processImages");
-        }}
-      >
-        FOR GOWTHAM
-      </button>
-    </div>
+    </ScreenContextProvider>
     // </div>
   );
 }

@@ -5,8 +5,8 @@ import { TextStyles } from "./types";
 
 export default function () {
   showUI({
-    height: 400,
-    width: 600,
+    height: 644,
+    width: 480,
   });
 
   on("cluster", async () => {
