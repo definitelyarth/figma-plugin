@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@aws-sdk/signature-v4": "^3.374.0",
     "@create-figma-plugin/ui": "^3.2.0",
     "@create-figma-plugin/utilities": "^3.2.0",
     "crypto": "^1.0.1",

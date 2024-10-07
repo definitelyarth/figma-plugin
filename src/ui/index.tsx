@@ -7,7 +7,7 @@ const MainUI = () => {
   return (
     <div
       class={
-        "flex flex-col w-full min-h-full overflow-scroll items-center justify-center p-2"
+        "flex flex-col w-full min-h-full overflow-scroll items-center justify-center h-[100vh] relative"
       }
     >
       <CurrScreen />

@@ -1,6 +1,6 @@
 import { h } from "preact";
 import TextInput from "../components/TextInput";
-import { Button } from "../components/button";
+import { Button } from "../components/Button";
 import { useScreenContext } from "../../contexts/ScreenContext";
 
 const Login = () => {

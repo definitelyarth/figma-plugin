@@ -6,7 +6,8 @@ export default {
       colors: {
         brand: "#8A3FFC",
         lightGray: "#667085",
-        lighterGray: "##D0D5DD",
+        lighterGray: "#D0D5DD",
+        lightestGray: "#F2F4F7",
       },
     },
   },

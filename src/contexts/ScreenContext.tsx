@@ -2,6 +2,7 @@ import { createContext, h } from "preact";
 import { FC, SetStateAction } from "preact/compat";
 import { Dispatch, useContext, useState } from "preact/hooks";
 import Login from "../ui/screens/Login";
+import PrepareToExport from "../ui/screens/PrepareToExport";
 
 type ScreenContextT = {
   currStep: number;
@@ -20,8 +21,8 @@ const screenContext = createContext<ScreenContextT>({
 const ScreenContextProvider: FC = ({ children }) => {
   const [currStep, setCurrStep] = useState(0);
 
-  const Steps = [Login];
-  const CurrScreen = Steps[currStep];
+  const Steps = [Login, PrepareToExport];
+  const CurrScreen = Steps[1];
 
   return (
     <screenContext.Provider

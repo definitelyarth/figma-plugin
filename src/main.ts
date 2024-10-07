@@ -32,6 +32,7 @@ export default function () {
   on("doIt", () => {});
 
   on("processImages", () => {
+    console.log("hre");
     // FOR GOWTAHM
   });
 }
