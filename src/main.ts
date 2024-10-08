@@ -24,9 +24,9 @@ export default function () {
     });
   });
 
-  on("transformCanvas", () => {
+  on("convert", () => {
     const output = transformCanvas(figma.currentPage);
-    figma.ui.postMessage({ output });
+    console.log({ output });
   });
 
   on("doIt", () => {});

@@ -1,7 +1,5 @@
 import { CustomTextNode, TextStyles } from "../types";
 import {
-  Border,
-  Color,
   Paint as RktmPaint,
   TextNode as RktmTextNode,
   TextNode,
@@ -106,7 +104,7 @@ const figmaTextNodeToRktmTypeStyle = (
   // const effects = node.
 
   return {
-    color: figmaTextNodeToProperties.color(fills),
+    color: figmaTextNodeToProperties.color(node, fills).data.paint,
     fontFamily: figmaTextNodeToProperties.fontFamily(fontName),
     fontBaseline: figmaTextNodeToProperties.fontBaseline(fontBaseLine),
     italic: figmaTextNodeToProperties.italic(fontName),
@@ -132,7 +130,7 @@ const figmaTextNodeToRktmTypeStyle = (
     lineHeightPx: figmaTextNodeToProperties.lineHeightPx(lineHeight),
     lineHeightUnit: figmaTextNodeToProperties.lineHeightUnit(lineHeight),
     textDecoration: figmaTextNodeToProperties.textDecoration(textDecoration),
-    effects: figmaEffectsToRktmTextEffects(node.effects),
+    effects: figmaEffectsToRktmTextEffects(node, node.effects).data,
     rotation: node.rotation,
   } satisfies Partial<TypeStyle>;
 };

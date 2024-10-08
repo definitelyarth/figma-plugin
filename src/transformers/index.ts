@@ -7,11 +7,8 @@ import {
   VectorNode,
 } from "../types/rpf";
 import { figmaFillsToRktmPaint } from "./utils";
-import {
-  ImageTransformer,
-  ShapeNodeTransformer,
-} from "./shapeNode.transformer";
-import { ExecutionContext, IdStore, RktmNodeType } from "./types";
+import { VectorTransformer } from "./shapeNode.transformer";
+import { Annotation, ExecutionContext, IdStore, RktmNodeType } from "./types";
 
 class FigmaFrameToRktmFrame {
   executionContext: ExecutionContext;
@@ -23,6 +20,7 @@ class FigmaFrameToRktmFrame {
       IMAGE: { map: new Map<string, string>(), lastId: -1 },
     };
     this.executionContext = {
+      annotations: [],
       frameChildNodes: [],
       IdStore,
       generateIdForChildNode({
@@ -49,45 +47,13 @@ class FigmaFrameToRktmFrame {
     yOffset: number
   ) {
     if (node.type === "FRAME" && typeof node.fills !== "symbol") {
-      let imageFound = false;
-      for (const fill of node.fills) {
-        if (fill.type === "IMAGE") {
-          const imageNode = ImageTransformer(
-            node,
-            fill,
-            xOffset,
-            yOffset,
-            ++this.executionContext.z
-          );
-          const id = this.executionContext.generateIdForChildNode({
-            type: "IMAGE",
-            hash: imageNode.imageUrl,
-          });
-          this.executionContext.frameChildNodes.push({ ...imageNode, id });
-          imageFound = true;
-        }
-      }
-      const paths = node.fillGeometry.map((d) => d.data);
-      const id = this.executionContext.generateIdForChildNode({
-        type: "SHAPE",
-        hash: JSON.stringify(paths),
-      });
-      if (!imageFound) {
-        const fill = figmaFillsToRktmPaint(node.fills);
-        const vector: VectorNode = {
-          height: node.height,
-          id,
-          name: node.name,
-          paths,
-          position: { x: xOffset + node.x, y: yOffset + node.y },
-          type: "VECTOR",
-          width: node.width,
-          zIndex: ++this.executionContext.z,
-          fill,
-          rotation: node.rotation,
-        };
-        this.executionContext.frameChildNodes.push(vector);
-      }
+      const vector = new VectorTransformer(
+        node,
+        xOffset,
+        yOffset,
+        this.executionContext
+      );
+      vector.export();
     }
     node.children.forEach((n) => {
       if (n.type === "FRAME") {
@@ -109,41 +75,54 @@ class FigmaFrameToRktmFrame {
       node.type === "STAR" ||
       node.type === "LINE"
     ) {
-      ShapeNodeTransformer(node, this.executionContext, xOffset, yOffset);
+      const vector = new VectorTransformer(
+        node,
+        xOffset,
+        yOffset,
+        this.executionContext
+      );
+      vector.export();
     } else if (node.type === "TEXT") {
       TextNodeTransformer(node, this.executionContext, xOffset, yOffset);
     }
   }
 
-  export(): FrameNode {
+  export(): { frame: FrameNode; annotations: Annotation[] } {
     this.recurse(this.input, 0, 0);
     return {
-      backgroundColor: figmaFillsToRktmPaint(this.input.backgrounds),
-      id: this.input.id,
-      link: "",
-      name: this.input.name,
-      type: "FRAME",
-      children: this.executionContext.frameChildNodes,
-      absoluteBoundingBox: {
-        height: this.input.height,
-        width: this.input.width,
-        x: 0,
-        y: 0,
+      frame: {
+        backgroundColor: figmaFillsToRktmPaint(
+          this.input,
+          this.input.backgrounds
+        ).data.paint,
+        id: this.input.id,
+        link: "",
+        name: this.input.name,
+        type: "FRAME",
+        children: this.executionContext.frameChildNodes,
+        absoluteBoundingBox: {
+          height: this.input.height,
+          width: this.input.width,
+          x: 0,
+          y: 0,
+        },
       },
+      annotations: this.executionContext.annotations,
     };
   }
 }
 
-export const generateIdForChildNode = () => {};
-
 export const transformCanvas = (page: PageNode) => {
   const frames: FrameNode[] = [];
+
+  const framesData: Record<string, { annotations: Annotation[] }> = {};
 
   for (const frameNode of page.selection) {
     if (frameNode.type !== "FRAME") continue;
     const transformer = new FigmaFrameToRktmFrame(frameNode);
-
-    frames.push(transformer.export());
+    const frameData = transformer.export();
+    framesData[frameData.frame.id] = { annotations: frameData.annotations };
+    frames.push(frameData.frame);
   }
 
   const RktmCanvas: CanvasNode = {
@@ -153,7 +132,8 @@ export const transformCanvas = (page: PageNode) => {
     type: "CANVAS",
     visible: true,
     children: frames,
-    backgroundColor: figmaFillsToRktmPaint(page.backgrounds).color as Color,
+    backgroundColor: figmaFillsToRktmPaint(page, page.backgrounds).data.paint
+      .color as Color,
   };
 
   const RktmDocument: RktmDocumentNode = {
@@ -165,5 +145,5 @@ export const transformCanvas = (page: PageNode) => {
     source: "figma",
   };
 
-  return RktmDocument;
+  return { doc: RktmDocument, annotations: framesData };
 };

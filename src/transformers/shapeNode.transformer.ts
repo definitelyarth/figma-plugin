@@ -1,156 +1,195 @@
 import { ShapeNode } from "../types/figma";
-import { Border, ImageNode, VectorEffect, VectorNode } from "../types/rpf";
-import { ExecutionContext } from "./types";
+import {
+  Border,
+  ImageNode,
+  ScaleMode,
+  VectorEffect,
+  VectorNode,
+} from "../types/rpf";
+import { Transformer } from "./asbtract";
+import { Annotation, ExecutionContext, WithAnnotation } from "./types";
 import {
   figmaFillsToRktmPaint,
   figmaTransformMatrixToTranslateAndRotation,
 } from "./utils";
 
-export const ImageTransformer = (
-  node: RectangleNode | FrameNode,
-  fill: ImagePaint,
-  xOffset: number,
-  yOffset: number,
-  z: number
-): ImageNode => {
-  return {
-    zIndex: z,
-    height: node.height,
-    id: "null",
-    imageUrl: fill.imageHash as string,
-    name: node.name,
-    position: {
-      x: node.x + xOffset,
-      y: node.y + yOffset,
-    },
-    rotation: node.rotation,
-    type: "IMAGE",
-    width: node.width,
-    styles: {
-      backgroundColor: {
-        blendMode: "NORMAL",
-        type: "SOLID",
-        color: { r: 0, g: 0, b: 0, a: 0 },
-      },
-      scaleMode:
-        fill.scaleMode !== "FILL" && fill.scaleMode !== "FIT"
-          ? undefined
-          : fill.scaleMode,
-      scale: fill.scalingFactor,
-      transform:
-        fill.imageTransform &&
-        figmaTransformMatrixToTranslateAndRotation(fill.imageTransform),
-    },
-  };
-};
+class VectorTransformer extends Transformer<ShapeNode | FrameNode, VectorNode> {
+  export() {
+    const fillsData = figmaFillsToRktmPaint(
+      this.node,
+      this.node.fills as Paint[]
+    );
 
-const getInvalidFills = (fills: Paint[]) => {
-  for (const fill of fills) {
-    if (fill.type === "IMAGE") {
-      return { invalid: true, image: fill };
-    }
-    if (fill.type === "VIDEO") {
-      return { invalid: true };
-    }
-  }
-  return { invalid: false };
-};
+    this.annotations.push(...fillsData.annotations);
 
-export const ShapeNodeTransformer = (
-  shape: ShapeNode,
-  executionContext: ExecutionContext,
-  xOffset: number,
-  yOffset: number
-) => {
-  const fillsData = getInvalidFills(shape.fills as Paint[]);
+    const paths =
+      this.node.type === "VECTOR"
+        ? this.node.vectorPaths.map((d) => d.data)
+        : this.node.fillGeometry.map((d) => d.data);
 
-  if (fillsData.invalid) {
-    if (fillsData.image !== undefined && shape.type === "RECTANGLE") {
-      const imageNode = ImageTransformer(
-        shape,
-        fillsData.image,
-        xOffset,
-        yOffset,
-        ++executionContext.z
+    let borderData: Border | undefined = undefined;
+    if (this.node.strokes.length >= 1) {
+      const strokeCap = this.node.strokeCap as StrokeCap;
+      const dashPattern = this.node.dashPattern;
+      const borderFillsSumm = figmaFillsToRktmPaint(
+        this.node,
+        this.node.strokes
       );
-      const id = executionContext.generateIdForChildNode({
-        type: "IMAGE",
-        hash: imageNode.imageUrl,
-      });
-      executionContext.frameChildNodes.push({ ...imageNode, id });
+      this.annotations.concat(borderFillsSumm.annotations);
+      borderData = {
+        color: borderFillsSumm.data.paint.color || {
+          r: 0,
+          g: 0,
+          b: 0,
+          a: 1,
+        },
+        width: this.node.strokeWeight as number,
+        style: dashPattern.length > 1 ? "dashed" : "solid",
+        dashCap:
+          strokeCap !== "SQUARE" && strokeCap !== "ROUND"
+            ? "square"
+            : (strokeCap.toLowerCase() as Border["dashCap"]),
+        radius:
+          this.node.type === "RECTANGLE"
+            ? {
+                bottomLeft: this.node.bottomLeftRadius,
+                bottomRight: this.node.bottomRightRadius,
+                topLeft: this.node.topLeftRadius,
+                topRight: this.node.topRightRadius,
+              }
+            : undefined,
+        dashWidth: dashPattern[0],
+        dashGap: dashPattern[1],
+      };
     }
-    return null;
-  }
-  let borderData: Border | undefined = undefined;
-  if (shape.strokes.length >= 1) {
-    const strokeCap = shape.strokeCap as StrokeCap;
-    const dashPattern = shape.dashPattern;
-    borderData = {
-      color: figmaFillsToRktmPaint(shape.strokes).color || {
-        r: 0,
-        g: 0,
-        b: 0,
-        a: 1,
+
+    const effectsData = figmaEffectsToRktmShapeEffects(
+      this.node,
+      this.node.effects
+    );
+    this.annotations.push(...effectsData.annotations);
+
+    const id = this.executionContext.generateIdForChildNode({
+      type: "SHAPE",
+      hash: JSON.stringify(paths),
+    });
+
+    const out: VectorNode = {
+      id,
+      name: this.node.name,
+      height: this.node.height,
+      paths,
+      position: {
+        x: this.node.x + this.xOffset,
+        y: this.node.y + this.yOffset,
       },
-      width: shape.strokeWeight as number,
-      style: dashPattern.length > 1 ? "dashed" : "solid",
-      dashCap:
-        strokeCap !== "SQUARE" && strokeCap !== "ROUND"
-          ? "square"
-          : (strokeCap.toLowerCase() as Border["dashCap"]),
-      radius:
-        shape.type === "RECTANGLE"
-          ? {
-              bottomLeft: shape.bottomLeftRadius,
-              bottomRight: shape.bottomRightRadius,
-              topLeft: shape.topLeftRadius,
-              topRight: shape.topRightRadius,
-            }
-          : undefined,
-      dashWidth: dashPattern[0],
-      dashGap: dashPattern[1],
+      type: "VECTOR",
+      width: this.node.width,
+      zIndex: ++this.executionContext.z,
+      fill: fillsData.data.paint,
+      rotation: this.node.rotation,
+      styles: {
+        border: borderData,
+        effects: effectsData.data,
+      },
+    };
+
+    if (fillsData.data.image) {
+      if (this.node.type !== "RECTANGLE") {
+        this.executionContext.annotations.push({
+          message:
+            "Image Fills are only supported on Rectangles And Frames. Omitting",
+          type: "error",
+          element: {
+            id: this.node.id,
+            name: this.node.name,
+          },
+        });
+      } else {
+        const imageTransformer = new ImageTransformer(
+          { node: this.node, fill: fillsData.data.image },
+          this.xOffset,
+          this.yOffset,
+          this.executionContext
+        );
+        imageTransformer.export();
+      }
+    }
+
+    this.executionContext.annotations.push(...this.annotations);
+    this.executionContext.frameChildNodes.push(out);
+  }
+}
+
+class ImageTransformer extends Transformer<
+  { node: RectangleNode | FrameNode; fill: ImagePaint },
+  ImageNode
+> {
+  scaleMode(
+    scaleMode: globalThis.ImagePaint["scaleMode"]
+  ): WithAnnotation<ScaleMode | undefined> {
+    const annotations: Annotation[] = [];
+    let out: ScaleMode | undefined = undefined;
+    if (scaleMode !== "FILL" && scaleMode !== "FIT") {
+      annotations.push({
+        message: `Invalid ScaleMode: ${scaleMode}.`,
+        type: "error",
+        element: { id: this.node.node.id, name: this.node.node.name },
+      });
+    } else {
+      out = scaleMode;
+    }
+    return {
+      data: out,
+      annotations,
     };
   }
 
-  const output: VectorNode = {
-    zIndex: ++executionContext.z,
-    height: shape.height,
-    id: "null",
-    name: shape.name,
-    paths:
-      shape.type === "VECTOR"
-        ? shape.vectorPaths.map((d) => d.data)
-        : shape.fillGeometry.map((d) => d.data),
-    position: {
-      x: shape.x + xOffset,
-      y: shape.y + yOffset,
-    },
-    rotation: shape.rotation,
-    type: "VECTOR",
-    width: shape.width,
-    fill:
-      typeof shape.fills === "symbol"
-        ? {
-            blendMode: "NORMAL",
-            type: "SOLID",
-            color: { r: 0, g: 0, b: 0, a: 1 },
-          }
-        : figmaFillsToRktmPaint(shape.fills),
-    styles: {
-      effects: figmaEffectsToRktmShapeEffects(shape.effects),
-      border: borderData,
-    },
-  };
-  const id = executionContext.generateIdForChildNode({
-    type: "SHAPE",
-    hash: JSON.stringify(output.paths),
-  });
-  executionContext.frameChildNodes.push({ ...output, id } as VectorNode);
-};
+  export() {
+    const id = this.executionContext.generateIdForChildNode({
+      type: "IMAGE",
+      hash: this.node.fill.imageHash as string,
+    });
+    const scaleMode = this.scaleMode(this.node.fill.scaleMode);
+    this.annotations.push(...scaleMode.annotations);
+    const out: ImageNode = {
+      type: "IMAGE",
+      zIndex: ++this.executionContext.z,
+      height: this.node.node.height,
+      width: this.node.node.width,
+      name: this.node.node.name,
+      position: {
+        x: this.node.node.x + this.xOffset,
+        y: this.node.node.y + this.yOffset,
+      },
+      id,
+      imageUrl: this.node.fill.imageHash as string,
+      styles: {
+        backgroundColor: {
+          blendMode: "NORMAL",
+          type: "SOLID",
+          color: { r: 0, g: 0, b: 0, a: 0 },
+        },
+        scaleMode: scaleMode.data,
+        scale: this.node.fill.scalingFactor,
+        transform:
+          this.node.fill.imageTransform &&
+          figmaTransformMatrixToTranslateAndRotation(
+            this.node.fill.imageTransform
+          ),
+      },
+    };
+    this.executionContext.annotations.push(...this.annotations);
+    this.executionContext.frameChildNodes.push(out);
+  }
+}
+
 const figmaEffectsToRktmShapeEffects = (
+  node: SceneNode,
   effects: Effect[] | readonly Effect[]
-): VectorEffect[] => {
+): WithAnnotation<VectorEffect[]> => {
   const finalEffects: VectorEffect[] = [];
+  const annotations: Annotation[] = [];
   let blur: undefined | number = undefined;
   for (const effect of effects) {
     if (effect.type === "DROP_SHADOW") {
@@ -162,8 +201,15 @@ const figmaEffectsToRktmShapeEffects = (
         type: "SHADOW",
         blurRadius: effect.radius,
       });
-    }
+    } else
+      annotations.push({
+        message: `Unsupported effect: ${effect.type}. Omitting`,
+        type: "error",
+        element: { id: node.id, name: node.name },
+      });
   }
 
-  return finalEffects;
+  return { data: finalEffects, annotations };
 };
+
+export { ImageTransformer, VectorTransformer };

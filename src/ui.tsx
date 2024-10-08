@@ -13,26 +13,33 @@ function Plugin() {
   useEffect(() => {
     onmessage = (e) => {
       const output = e.data.pluginMessage as { output: DocumentNode };
-      const blobURL = window.URL.createObjectURL(
-        new Blob([JSON.stringify(output.output)], { type: "application/json" })
-      );
-      const link = document.createElement("a");
-      link.href = blobURL;
-      link.download = `${output.output.name}.rktm`;
-      link.click();
-      link.setAttribute("download", `${output.output.name}.rktm`);
+      // const blobURL = window.URL.createObjectURL(
+      //   new Blob([JSON.stringify(output.output)], { type: "application/json" })
+      // );
+      // const link = document.createElement("a");
+      // link.href = blobURL;
+      // link.download = `${output.output.name}.rktm`;
+      // link.click();
+      // link.setAttribute("download", `${output.output.name}.rktm`);
     };
   }, []);
   return (
-    // <div
-    //   className={
-    //     "flex flex-col gap-2 items-center justify-center w-full min-h-full overflow-scroll p-4"
-    //   }
-    // >
-    <ScreenContextProvider>
-      <MainUI />
-    </ScreenContextProvider>
-    // </div>
+    <div
+      className={
+        "flex flex-col gap-2 items-center justify-center w-full min-h-full overflow-scroll p-4"
+      }
+    >
+      <button
+        onClick={() => {
+          emit("convert");
+        }}
+      >
+        Convert to Rktm
+      </button>
+      {/* // <ScreenContextProvider>
+    //   <MainUI />
+    // </ScreenContextProvider> */}
+    </div>
   );
 }
 

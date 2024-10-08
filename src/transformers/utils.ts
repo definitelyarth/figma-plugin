@@ -4,6 +4,7 @@ import {
   Paint as RktmPaint,
   TextEffect,
 } from "../types/rpf";
+import { Annotation, WithAnnotation } from "./types";
 
 export const figmaTransformMatrixToTranslateAndRotation = (
   transform: Transform
@@ -18,10 +19,11 @@ export const figmaTransformMatrixToTranslateAndRotation = (
 };
 
 export const figmaEffectsToRktmTextEffects = (
+  node: SceneNode,
   effects: readonly Effect[] | Effect[]
-): TextEffect[] => {
+): WithAnnotation<TextEffect[]> => {
+  const annotations: Annotation[] = [];
   const finalEffects: TextEffect[] = [];
-  let blur: undefined | number = undefined;
   for (const effect of effects) {
     if (effect.type === "DROP_SHADOW") {
       finalEffects.push({
@@ -32,17 +34,38 @@ export const figmaEffectsToRktmTextEffects = (
         type: "SHADOW",
         blurRadius: effect.radius,
       });
+    } else {
+      annotations.push({
+        message: `Unsupported effect ${effect.type}. Omitted in Rktm`,
+        type: "error",
+        element: { id: node.id, name: node.name },
+      });
     }
   }
-  return finalEffects;
+  return { data: finalEffects, annotations };
 };
 
 export const figmaBlendModeToRktmBlendMode = (
+  node: SceneNode | PageNode,
   figmaBlendMode?: BlendMode
-): RktmBlendMode => {
-  return figmaBlendMode !== "NORMAL" && figmaBlendMode !== "PASS_THROUGH"
-    ? "NORMAL"
-    : figmaBlendMode;
+): WithAnnotation<RktmBlendMode> => {
+  const annotations: Annotation[] = [];
+
+  let blendMode: RktmBlendMode = "NORMAL";
+  if (figmaBlendMode !== "NORMAL" && figmaBlendMode !== "PASS_THROUGH") {
+    annotations.push({
+      message: `Unsupported blend mode: ${figmaBlendMode}. Using NORMAL`,
+      type: "error",
+      element: { id: node.id, name: node.name },
+    });
+  } else {
+    blendMode = figmaBlendMode;
+  }
+
+  return {
+    data: blendMode,
+    annotations,
+  };
 };
 
 const figmaGradientTransformToRktmGradientHandlePositions = (
@@ -50,55 +73,86 @@ const figmaGradientTransformToRktmGradientHandlePositions = (
 ): Position[] => [{ x: input[0][2], y: input[1][2] }];
 
 export const figmaFillsToRktmPaint = (
+  node: SceneNode | PageNode,
   figmaFills: Paint[] | readonly Paint[]
-): Partial<RktmPaint> => {
+): WithAnnotation<{ paint: Partial<RktmPaint>; image?: ImagePaint }> => {
+  const annotations: Annotation[] = [];
+
+  let outFill: Partial<RktmPaint> | undefined = undefined;
+  let imageFill: ImagePaint | undefined = undefined;
+  if (figmaFills.length > 1)
+    annotations.push({
+      message: "Only one fill is supported per element.",
+      type: "info",
+      element: { name: node.name, id: node.id },
+    });
+
   for (const fill of figmaFills) {
-    if (fill.type == "SOLID") {
-      return {
-        blendMode: figmaBlendModeToRktmBlendMode(fill.blendMode),
-        type: "SOLID",
-        color: {
-          r: fill.color.r * 255,
-          g: fill.color.g * 255,
-          b: fill.color.b * 255,
-          a: fill.opacity || 1,
-        },
-        visible: fill.visible,
-      };
-    } else if (
-      fill.type === "GRADIENT_LINEAR" ||
-      fill.type === "GRADIENT_RADIAL"
-    ) {
-      return {
-        blendMode: figmaBlendModeToRktmBlendMode(fill.blendMode),
-        type: fill.type,
-        gradientStops: fill.gradientStops.map((stop) => {
-          return {
-            position: stop.position,
-            color: {
-              a: stop.color.a,
-              b: stop.color.b * 255,
-              r: stop.color.r * 255,
-              g: stop.color.g * 255,
-            },
-          };
-        }),
-        gradientHandlePositions:
-          figmaGradientTransformToRktmGradientHandlePositions(
-            fill.gradientTransform
-          ),
-      };
+    if (typeof imageFill === "undefined" && fill.type === "IMAGE")
+      imageFill = fill;
+    if (typeof outFill === "undefined") {
+      const blendModeData = figmaBlendModeToRktmBlendMode(node, fill.blendMode);
+      annotations.concat(blendModeData.annotations);
+      if (fill.type == "SOLID") {
+        outFill = {
+          blendMode: blendModeData.data,
+          type: "SOLID",
+          color: {
+            r: fill.color.r * 255,
+            g: fill.color.g * 255,
+            b: fill.color.b * 255,
+            a: fill.opacity || 1,
+          },
+          visible: fill.visible,
+        };
+      } else if (
+        fill.type === "GRADIENT_LINEAR" ||
+        fill.type === "GRADIENT_RADIAL"
+      ) {
+        outFill = {
+          blendMode: blendModeData.data,
+          type: fill.type,
+          gradientStops: fill.gradientStops.map((stop) => {
+            return {
+              position: stop.position,
+              color: {
+                a: stop.color.a,
+                b: stop.color.b * 255,
+                r: stop.color.r * 255,
+                g: stop.color.g * 255,
+              },
+            };
+          }),
+          gradientHandlePositions:
+            figmaGradientTransformToRktmGradientHandlePositions(
+              fill.gradientTransform
+            ),
+        };
+      } else {
+        annotations.push({
+          message: `Unsupported fill ${fill.type}.`,
+          type: "info",
+          element: { name: node.name, id: node.id },
+        });
+      }
     }
   }
+  if (!outFill) {
+    outFill = {
+      blendMode: "NORMAL",
+      type: "SOLID",
+      color: {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 0,
+      },
+      opacity: 0,
+    };
+  }
+
   return {
-    blendMode: "NORMAL",
-    type: "SOLID",
-    color: {
-      r: 0,
-      g: 0,
-      b: 0,
-      a: 0,
-    },
-    opacity: 0,
+    data: { paint: outFill, image: imageFill },
+    annotations,
   };
 };
