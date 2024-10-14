@@ -1,7 +1,5 @@
 import { on, showUI } from "@create-figma-plugin/utilities";
-// import { performClustering } from "./clustering";
 import { transformCanvas } from "./transformers";
-import { TextStyles } from "./types";
 
 export default function () {
   showUI({
@@ -9,30 +7,54 @@ export default function () {
     width: 480,
   });
 
-  on("cluster", async () => {
-    console.log("clustering : " + figma.fileKey);
-    // figma.ui.postMessage({ variants: await performClustering() });
+  figma.on("selectionchange", async () => {
+    if (
+      figma.currentPage.selection.findIndex((e) => e.type === "FRAME") != -1
+    ) {
+      const output = await transformCanvas(figma.currentPage);
+      figma.ui.postMessage({ event: "selection", data: output });
+    } else {
+      figma.ui.postMessage({ event: "selection", data: undefined });
+    }
+  });
+
+  figma.on("run", async () => {
+    if (
+      figma.currentPage.selection.findIndex((e) => e.type === "FRAME") != -1
+    ) {
+      const output = await transformCanvas(figma.currentPage);
+      figma.ui.postMessage({ event: "selection", data: output });
+    } else {
+      figma.ui.postMessage({ event: "selection", data: undefined });
+    }
+  });
+
+  on("selection-clear", () => {
+    figma.currentPage.selection = [];
+  });
+
+  on("set-value", async (data: { key: string; value: string }) => {
+    await figma.clientStorage.setAsync(data.key, data.value);
+    figma.ui.postMessage({
+      event: "get-value",
+      data: { key: data.key, value: data.value },
+    });
+  });
+
+  on("get-value", async (data: { key: string }) => {
+    const value = await figma.clientStorage
+      .getAsync(data.key)
+      .catch(() => null);
+    figma.ui.postMessage({
+      event: "get-value",
+      data: { key: data.key, value },
+    });
   });
 
   on("printSelected", () => {
     figma.currentPage.selection.forEach((e) => {
-      if (e.type === "TEXT") {
-        console.log({ runs: e.getStyledTextSegments(TextStyles) });
-      }
       const printObj: Record<string, unknown> = { name: e.name, node: e };
       console.log(printObj);
     });
-  });
-
-  on("convert", () => {
-    const output = transformCanvas(figma.currentPage);
-    console.log({ output });
-  });
-
-  on("doIt", () => {});
-
-  on("processImages", () => {
-    console.log("hre");
-    // FOR GOWTAHM
   });
 }

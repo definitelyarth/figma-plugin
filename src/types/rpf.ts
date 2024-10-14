@@ -70,7 +70,7 @@ export interface TextStyleRun {
 export interface ImageNode extends Layer {
   readonly type: PaintTypeImage;
   /** URL to the image asset */
-  readonly imageUrl: string;
+  imageUrl: string;
   /** Width of the image */
   readonly width: number;
   /** Height of the image */

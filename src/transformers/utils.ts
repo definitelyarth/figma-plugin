@@ -4,7 +4,7 @@ import {
   Paint as RktmPaint,
   TextEffect,
 } from "../types/rpf";
-import { Annotation, WithAnnotation } from "./types";
+import { Annotation, WithAnnotations } from "./types";
 
 export const figmaTransformMatrixToTranslateAndRotation = (
   transform: Transform
@@ -21,7 +21,7 @@ export const figmaTransformMatrixToTranslateAndRotation = (
 export const figmaEffectsToRktmTextEffects = (
   node: SceneNode,
   effects: readonly Effect[] | Effect[]
-): WithAnnotation<TextEffect[]> => {
+): WithAnnotations<TextEffect[]> => {
   const annotations: Annotation[] = [];
   const finalEffects: TextEffect[] = [];
   for (const effect of effects) {
@@ -48,7 +48,7 @@ export const figmaEffectsToRktmTextEffects = (
 export const figmaBlendModeToRktmBlendMode = (
   node: SceneNode | PageNode,
   figmaBlendMode?: BlendMode
-): WithAnnotation<RktmBlendMode> => {
+): WithAnnotations<RktmBlendMode> => {
   const annotations: Annotation[] = [];
 
   let blendMode: RktmBlendMode = "NORMAL";
@@ -75,17 +75,11 @@ const figmaGradientTransformToRktmGradientHandlePositions = (
 export const figmaFillsToRktmPaint = (
   node: SceneNode | PageNode,
   figmaFills: Paint[] | readonly Paint[]
-): WithAnnotation<{ paint: Partial<RktmPaint>; image?: ImagePaint }> => {
+): WithAnnotations<{ paint: Partial<RktmPaint>; image?: ImagePaint }> => {
   const annotations: Annotation[] = [];
 
   let outFill: Partial<RktmPaint> | undefined = undefined;
   let imageFill: ImagePaint | undefined = undefined;
-  if (figmaFills.length > 1)
-    annotations.push({
-      message: "Only one fill is supported per element.",
-      type: "info",
-      element: { name: node.name, id: node.id },
-    });
 
   for (const fill of figmaFills) {
     if (typeof imageFill === "undefined" && fill.type === "IMAGE")
@@ -150,7 +144,15 @@ export const figmaFillsToRktmPaint = (
       opacity: 0,
     };
   }
-
+  if (
+    figmaFills.length > 1 &&
+    !(figmaFills.length == 2 && typeof imageFill !== "undefined")
+  )
+    annotations.push({
+      message: "Only one fill is supported per element.",
+      type: "info",
+      element: { name: node.name, id: node.id },
+    });
   return {
     data: { paint: outFill, image: imageFill },
     annotations,

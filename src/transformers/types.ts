@@ -1,4 +1,4 @@
-import { FrameChildNode } from "../types/rpf";
+import { DocumentNode, FrameChildNode } from "../types/rpf";
 
 export type RktmNodeType = "TEXT" | "SHAPE" | "IMAGE";
 
@@ -6,7 +6,7 @@ export type IdStore = {
   [key in RktmNodeType]: { map: Map<string, string>; lastId: number };
 };
 
-export type WithAnnotation<T> = { annotations: Annotation[]; data: T };
+export type WithAnnotations<T> = { annotations: Annotation[]; data: T };
 
 export type AnnotationType = "info" | "error";
 
@@ -18,6 +18,24 @@ export type Annotation = {
     name: string;
   };
 };
+
+export type ImageState = "PENDING" | "IN_PROGRESS" | "ERROR" | "COMPLETED";
+
+export type ImageMap = Record<
+  string,
+  {
+    state: ImageState;
+    uploadedUrl?: string;
+    images: {
+      id: string;
+      idx: number;
+      frameIdx: number;
+    }[];
+    name: string;
+    bytes: Uint8Array;
+    isExport?: boolean;
+  }
+>;
 
 export type ExecutionContext = {
   IdStore: IdStore;
@@ -31,4 +49,18 @@ export type ExecutionContext = {
     hash: string;
   }): string;
   z: number;
+  imageMap: ImageMap;
+  frameIdx: number;
+};
+
+export type TransformOutput = {
+  doc: DocumentNode;
+  annotations: Record<
+    string,
+    {
+      annotations: Annotation[];
+      name: string;
+    }
+  >;
+  imageMap: ImageMap;
 };

@@ -7,14 +7,14 @@ import {
   VectorNode,
 } from "../types/rpf";
 import { Transformer } from "./asbtract";
-import { Annotation, ExecutionContext, WithAnnotation } from "./types";
+import { Annotation, ExecutionContext, WithAnnotations } from "./types";
 import {
   figmaFillsToRktmPaint,
   figmaTransformMatrixToTranslateAndRotation,
 } from "./utils";
 
 class VectorTransformer extends Transformer<ShapeNode | FrameNode, VectorNode> {
-  export() {
+  async export() {
     const fillsData = figmaFillsToRktmPaint(
       this.node,
       this.node.fills as Paint[]
@@ -43,7 +43,10 @@ class VectorTransformer extends Transformer<ShapeNode | FrameNode, VectorNode> {
           b: 0,
           a: 1,
         },
-        width: this.node.strokeWeight as number,
+        width:
+          typeof this.node.strokeWeight === "number"
+            ? this.node.strokeWeight
+            : 0,
         style: dashPattern.length > 1 ? "dashed" : "solid",
         dashCap:
           strokeCap !== "SQUARE" && strokeCap !== "ROUND"
@@ -112,12 +115,12 @@ class VectorTransformer extends Transformer<ShapeNode | FrameNode, VectorNode> {
           this.yOffset,
           this.executionContext
         );
-        imageTransformer.export();
+        await imageTransformer.export();
       }
+    } else {
+      this.executionContext.annotations.push(...this.annotations);
+      this.executionContext.frameChildNodes.push(out);
     }
-
-    this.executionContext.annotations.push(...this.annotations);
-    this.executionContext.frameChildNodes.push(out);
   }
 }
 
@@ -125,17 +128,64 @@ class ImageTransformer extends Transformer<
   { node: RectangleNode | FrameNode; fill: ImagePaint },
   ImageNode
 > {
+  static async fromShape(
+    shape: ShapeNode,
+    ctx: ExecutionContext,
+    xOffset: number,
+    yOffset: number
+  ) {
+    // const hash = (
+    //   // await Gzip(await shape.exportAsync({ format: "PNG" }))
+    // ).toString();
+    const hash = "";
+
+    const id = ctx.generateIdForChildNode({ type: "IMAGE", hash });
+
+    const out: ImageNode = {
+      id,
+      name: shape.name,
+      height: 0,
+      width: 0,
+      imageUrl: "",
+      position: { x: xOffset + shape.x, y: yOffset + shape.y },
+      styles: {},
+      type: "IMAGE",
+      zIndex: ++ctx.z,
+    };
+
+    ctx.frameChildNodes.push(out);
+
+    const image = {
+      frameIdx: ctx.frameIdx,
+      id: out.id,
+      idx: ctx.frameChildNodes.length - 1,
+    };
+
+    if (!ctx.imageMap[hash]) {
+      ctx.imageMap[hash] = {
+        images: [image],
+        state: "PENDING",
+
+        bytes: await shape.exportAsync({ format: "PNG" }),
+        name: `${out.id}-${new Date().toDateString()}`,
+      };
+    } else {
+      ctx.imageMap[hash].images.push(image);
+    }
+  }
+
   scaleMode(
     scaleMode: globalThis.ImagePaint["scaleMode"]
-  ): WithAnnotation<ScaleMode | undefined> {
+  ): WithAnnotations<ScaleMode | undefined> {
     const annotations: Annotation[] = [];
     let out: ScaleMode | undefined = undefined;
-    if (scaleMode !== "FILL" && scaleMode !== "FIT") {
-      annotations.push({
-        message: `Invalid ScaleMode: ${scaleMode}.`,
-        type: "error",
-        element: { id: this.node.node.id, name: this.node.node.name },
-      });
+    if (scaleMode !== "FILL" && scaleMode !== "FIT" && scaleMode) {
+      if (scaleMode !== "CROP")
+        annotations.push({
+          message: `Invalid ScaleMode: ${scaleMode}.`,
+          type: "error",
+          element: { id: this.node.node.id, name: this.node.node.name },
+        });
     } else {
       out = scaleMode;
     }
@@ -145,7 +195,7 @@ class ImageTransformer extends Transformer<
     };
   }
 
-  export() {
+  async export() {
     const id = this.executionContext.generateIdForChildNode({
       type: "IMAGE",
       hash: this.node.fill.imageHash as string,
@@ -181,13 +231,31 @@ class ImageTransformer extends Transformer<
     };
     this.executionContext.annotations.push(...this.annotations);
     this.executionContext.frameChildNodes.push(out);
+    const figmaImage = figma.getImageByHash(out.imageUrl) as Image;
+    const bytes = await figmaImage.getBytesAsync();
+    const image = {
+      frameIdx: this.executionContext.frameIdx,
+      id: out.id,
+      idx: this.executionContext.frameChildNodes.length - 1,
+    };
+
+    if (!this.executionContext.imageMap[figmaImage.hash]) {
+      this.executionContext.imageMap[figmaImage.hash] = {
+        images: [image],
+        state: "PENDING",
+        bytes,
+        name: `${out.id}-${new Date().toDateString()}`,
+      };
+    } else {
+      this.executionContext.imageMap[figmaImage.hash].images.push(image);
+    }
   }
 }
 
 const figmaEffectsToRktmShapeEffects = (
   node: SceneNode,
   effects: Effect[] | readonly Effect[]
-): WithAnnotation<VectorEffect[]> => {
+): WithAnnotations<VectorEffect[]> => {
   const finalEffects: VectorEffect[] = [];
   const annotations: Annotation[] = [];
   let blur: undefined | number = undefined;
