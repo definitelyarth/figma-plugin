@@ -6,6 +6,7 @@ import { emit } from "@create-figma-plugin/utilities";
 import { FC } from "preact/compat";
 import { Annotation } from "src/transformers/types";
 import Accordion from "../components/Accordion";
+import AlertTriangleIcon from "../icons/AlertTriangleIcon";
 
 const FrameAnnotations: FC<{
   frame: { annotations: Annotation[]; name: string };
@@ -37,8 +38,8 @@ const PrepareToExport = () => {
         </div>
       ) : (
         <div className="flex flex-col gap-3 h-full text-black w-full">
-          <div className="flex justify-between px-4 w-full">
-            <span>Selected elements</span>
+          <div className="flex justify-between p-2 w-full">
+            <span className={"text-xs"}>Selected elements</span>
             <div
               className="flex items-center gap-2 text-brand fill-brand cursor-pointer"
               onClick={() => {
@@ -51,9 +52,15 @@ const PrepareToExport = () => {
           <Accordion
             items={Object.keys(selection.annotations).map((k) => {
               const frame = selection.annotations[k];
+              const error = frame.annotations.findIndex(
+                (e) => e.type === "error"
+              );
+              const warning = frame.annotations.findIndex(
+                (e) => e.type === "info"
+              );
               return {
                 content: (
-                  <div>
+                  <div className={"text-xs"}>
                     {frame.annotations.length === 0 ? (
                       <p>No issues found</p>
                     ) : (
@@ -64,6 +71,8 @@ const PrepareToExport = () => {
                   </div>
                 ),
                 title: selection.annotations[k].name,
+                error: error !== -1,
+                warning: warning !== -1,
               };
             })}
           />

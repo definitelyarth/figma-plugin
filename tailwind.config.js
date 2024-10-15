@@ -8,6 +8,8 @@ export default {
         lightGray: "#667085",
         lighterGray: "#D0D5DD",
         lightestGray: "#F2F4F7",
+        alert: "#D92D20",
+        warning: "#F79009",
       },
     },
   },

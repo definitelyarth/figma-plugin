@@ -780,6 +780,10 @@ video {
   border-width: 2px;
 }
 
+.border-b {
+  border-bottom-width: 1px;
+}
+
 .border-b-2 {
   border-bottom-width: 2px;
 }
@@ -800,10 +804,6 @@ video {
   border-top-width: 1px;
 }
 
-.border-b {
-  border-bottom-width: 1px;
-}
-
 .border-brand {
   --tw-border-opacity: 1;
   border-color: rgb(138 63 252 / var(--tw-border-opacity));
@@ -814,14 +814,14 @@ video {
   border-color: rgb(229 231 235 / var(--tw-border-opacity));
 }
 
-.border-lightGray {
-  --tw-border-opacity: 1;
-  border-color: rgb(102 112 133 / var(--tw-border-opacity));
-}
-
 .border-gray-300 {
   --tw-border-opacity: 1;
   border-color: rgb(209 213 219 / var(--tw-border-opacity));
+}
+
+.border-lightGray {
+  --tw-border-opacity: 1;
+  border-color: rgb(102 112 133 / var(--tw-border-opacity));
 }
 
 .bg-black {
@@ -832,6 +832,16 @@ video {
 .bg-brand {
   --tw-bg-opacity: 1;
   background-color: rgb(138 63 252 / var(--tw-bg-opacity));
+}
+
+.bg-gray-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity));
+}
+
+.bg-gray-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity));
 }
 
 .bg-lightGray {
@@ -857,16 +867,6 @@ video {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.bg-gray-100 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(243 244 246 / var(--tw-bg-opacity));
-}
-
-.bg-gray-200 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(229 231 235 / var(--tw-bg-opacity));
 }
 
 .fill-brand {
@@ -1000,6 +1000,11 @@ video {
   line-height: 1.25rem;
 }
 
+.text-alert {
+  --tw-text-opacity: 1;
+  color: rgb(217 45 32 / var(--tw-text-opacity));
+}
+
 .text-black {
   --tw-text-opacity: 1;
   color: rgb(0 0 0 / var(--tw-text-opacity));
@@ -1008,6 +1013,11 @@ video {
 .text-brand {
   --tw-text-opacity: 1;
   color: rgb(138 63 252 / var(--tw-text-opacity));
+}
+
+.text-gray-700 {
+  --tw-text-opacity: 1;
+  color: rgb(55 65 81 / var(--tw-text-opacity));
 }
 
 .text-lightGray {
@@ -1020,9 +1030,9 @@ video {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
-.text-gray-700 {
+.text-warning {
   --tw-text-opacity: 1;
-  color: rgb(55 65 81 / var(--tw-text-opacity));
+  color: rgb(247 144 9 / var(--tw-text-opacity));
 }
 
 .underline {
