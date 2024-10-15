@@ -41,6 +41,7 @@ const Login = () => {
               Email
             </label>
             <TextInput
+              disabled={isLoading}
               id={"email"}
               placeholder={"Enter your email"}
               className={"w-full"}
@@ -54,6 +55,7 @@ const Login = () => {
               Password
             </label>
             <TextInput
+              disabled={isLoading}
               id={"password"}
               placeholder={"Enter your password"}
               className={"w-full"}

@@ -3,11 +3,11 @@ import { FC, SetStateAction } from "preact/compat";
 import { Dispatch, useContext, useEffect, useState } from "preact/hooks";
 import Login from "../screens/Login";
 import PrepareToExport from "../screens/PrepareToExport";
-import { useQuery } from "react-query";
 import Loader from "../components/Loader";
 import { useIsLoggedIn } from "../state/queries";
 import { emit } from "@create-figma-plugin/utilities";
 import { TransformOutput } from "../../transformers/types";
+import ReadyForExport from "../screens/ReadyForExport";
 
 type ScreenContextT = {
   currStep: number;
@@ -15,6 +15,10 @@ type ScreenContextT = {
   CurrScreen: () => h.JSX.Element;
   nextStep: () => void;
   prevStep: () => void;
+  userId: string | null;
+  sessionId: string | null;
+  finalDoc: TransformOutput["doc"] | null;
+  setFinalDoc: Dispatch<SetStateAction<TransformOutput["doc"] | null>>;
 };
 
 const screenContext = createContext<ScreenContextT>({
@@ -23,10 +27,15 @@ const screenContext = createContext<ScreenContextT>({
   nextStep: () => {},
   prevStep: () => {},
   selection: undefined,
+  userId: null,
+  sessionId: null,
+  finalDoc: null,
+  setFinalDoc: () => {},
 });
 
 const ScreenContextProvider: FC = ({ children }) => {
   const [selection, setSelection] = useState<undefined | TransformOutput>();
+  const [finalDoc, setFinalDoc] = useState<null | TransformOutput["doc"]>(null);
 
   const [userId, setUserId] = useState<null | string>(null);
   const [sessionId, setSessionId] = useState<null | string>(null);
@@ -59,33 +68,35 @@ const ScreenContextProvider: FC = ({ children }) => {
     emit("get-value", { key: "sessionId" });
   }, []);
 
-  // const { data, isLoading, isError, refetch } = useIsLoggedIn({
-  //   userId,
-  //   sessionId,
-  // });
+  const { data, isLoading, isError, refetch } = useIsLoggedIn({
+    userId,
+    sessionId,
+  });
 
-  // useEffect(() => {
-  //   refetch();
-  // }, [userId, sessionId]);
+  useEffect(() => {
+    refetch();
+  }, [userId, sessionId]);
 
-  // if (isError) {
-  //   return <h1>error</h1>;
-  // }
+  if (isError) {
+    return <h1>error</h1>;
+  }
 
-  // if (isLoading) {
-  //   return <Loader />;
-  // }
+  if (isLoading) {
+    return <Loader />;
+  }
 
-  const Steps = [PrepareToExport];
-  const CurrScreen = Steps[0];
+  const Steps = [PrepareToExport, ReadyForExport];
+  const CurrScreen = Steps[currStep];
 
-  // if (!data) {
-  //   return <Login />;
-  // }
+  if (!data) {
+    return <Login />;
+  }
 
   return (
     <screenContext.Provider
       value={{
+        finalDoc,
+        setFinalDoc,
         selection,
         CurrScreen,
         currStep,
@@ -95,6 +106,8 @@ const ScreenContextProvider: FC = ({ children }) => {
         prevStep: () => {
           if (currStep > 0) setCurrStep((s) => s - 1);
         },
+        userId,
+        sessionId,
       }}
     >
       {children}

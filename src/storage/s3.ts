@@ -1,11 +1,9 @@
 const uploadFileToS3 = async ({
   imageBytes,
-  name,
   userId,
   sessionId,
 }: {
   imageBytes: Uint8Array;
-  name: string;
   userId: string;
   sessionId: string;
 }): Promise<string> => {

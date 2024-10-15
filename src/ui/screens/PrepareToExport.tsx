@@ -3,16 +3,7 @@ import Table from "../icons/Table";
 import { useScreenContext } from "../contexts/ScreenContext";
 import CrossIcon from "../icons/CrossIcon";
 import { emit } from "@create-figma-plugin/utilities";
-import { FC } from "preact/compat";
-import { Annotation } from "src/transformers/types";
 import Accordion from "../components/Accordion";
-import AlertTriangleIcon from "../icons/AlertTriangleIcon";
-
-const FrameAnnotations: FC<{
-  frame: { annotations: Annotation[]; name: string };
-}> = ({ frame }) => {
-  return <div></div>;
-};
 
 const PrepareToExport = () => {
   const { selection } = useScreenContext();

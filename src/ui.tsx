@@ -12,7 +12,7 @@ const queryClient = new QueryClient();
 function Plugin() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
       <ScreenContextProvider>
         <MainUI />
       </ScreenContextProvider>

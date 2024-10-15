@@ -6,7 +6,10 @@ export const Button: FC<HTMLProps<HTMLButtonElement>> = ({
   ...props
 }) => {
   return (
-    <button {...props} className={"bg-brand p-2 text-white rounded-md"}>
+    <button
+      {...props}
+      className={"bg-brand p-2 text-white rounded-md disabled:opacity-70"}
+    >
       {children}
     </button>
   );

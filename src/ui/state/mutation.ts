@@ -1,6 +1,36 @@
 import { useMutation } from "react-query";
 import CryptoJS from "crypto-js";
 import { emit } from "@create-figma-plugin/utilities";
+import { TransformOutput } from "src/transformers/types";
+import { useScreenContext } from "../contexts/ScreenContext";
+import { uploadFileToS3 } from "src/storage/s3";
+
+const useMutatePopulateImages = () => {
+  const { userId, sessionId, nextStep, setFinalDoc } = useScreenContext();
+  return useMutation({
+    mutationFn: async ({ data }: { data: TransformOutput }) => {
+      if (!userId || !sessionId) return;
+      const canvas = data.doc.children![0];
+      for await (const hash of Object.keys(data.imageMap)) {
+        const obj = data.imageMap[hash];
+        obj.state == "IN_PROGRESS";
+        const key = await uploadFileToS3({
+          userId,
+          sessionId,
+          imageBytes: obj.bytes,
+        });
+        obj.uploadedUrl = key;
+        for (const image of obj.images) {
+          const imageNode =
+            canvas.children![image.frameIdx].children![image.idx];
+          if (imageNode.type === "IMAGE") imageNode.imageUrl = obj.uploadedUrl;
+        }
+      }
+      setFinalDoc(data.doc);
+      nextStep();
+    },
+  });
+};
 
 const useMutateLogin = () =>
   useMutation({
@@ -56,4 +86,4 @@ const useMutateLogin = () =>
     },
   });
 
-export { useMutateLogin };
+export { useMutateLogin, useMutatePopulateImages };

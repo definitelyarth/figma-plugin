@@ -3,9 +3,14 @@ import { useScreenContext } from "./contexts/ScreenContext";
 import Header from "./components/Header";
 import ExternalIcon from "./icons/ExternalIcon";
 import { Button } from "./components/Button";
+import { useMutatePopulateImages } from "./state/mutation";
+import { TransformOutput } from "src/transformers/types";
+import { downloadRktm } from "./utils/download";
+import Loader from "./components/Loader";
 
 const MainUI = () => {
-  const { CurrScreen } = useScreenContext();
+  const { CurrScreen, selection, currStep, finalDoc } = useScreenContext();
+  const { mutateAsync, isLoading, isError } = useMutatePopulateImages();
 
   return (
     <div
@@ -16,9 +21,7 @@ const MainUI = () => {
       <Header />
       <CurrScreen />
       <div
-        className={
-          "flex justify-between border-t w-screen left-0 p-4 items-center"
-        }
+        className={"flex justify-between border-t w-screen p-4 items-center"}
       >
         <a
           href=""
@@ -27,7 +30,22 @@ const MainUI = () => {
           <ExternalIcon />
           Guidelines for export Rktm
         </a>
-        <Button>Prepare for Export</Button>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <Button
+            disabled={selection === undefined || isLoading || isError}
+            onClick={async () => {
+              if (currStep === 0) {
+                await mutateAsync({ data: selection as TransformOutput });
+              } else if (currStep === 1) {
+                if (finalDoc) downloadRktm(finalDoc);
+              }
+            }}
+          >
+            {currStep == 0 ? "Prepare for Export" : "Export"}
+          </Button>
+        )}
       </div>
     </div>
   );
