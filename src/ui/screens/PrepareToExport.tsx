@@ -5,6 +5,7 @@ import CrossIcon from "../icons/CrossIcon";
 import { emit } from "@create-figma-plugin/utilities";
 import { FC } from "preact/compat";
 import { Annotation } from "src/transformers/types";
+import Accordion from "../components/Accordion";
 
 const FrameAnnotations: FC<{
   frame: { annotations: Annotation[]; name: string };
@@ -47,11 +48,25 @@ const PrepareToExport = () => {
               <CrossIcon /> Clear Selection
             </div>
           </div>
-          {Object.keys(selection.annotations).map((key, idx) => {
-            return (
-              <FrameAnnotations frame={selection.annotations[key]} key={idx} />
-            );
-          })}
+          <Accordion
+            items={Object.keys(selection.annotations).map((k) => {
+              const frame = selection.annotations[k];
+              return {
+                content: (
+                  <div>
+                    {frame.annotations.length === 0 ? (
+                      <p>No issues found</p>
+                    ) : (
+                      frame.annotations.map((a) => {
+                        return <div>{a.message}</div>;
+                      })
+                    )}
+                  </div>
+                ),
+                title: selection.annotations[k].name,
+              };
+            })}
+          />
         </div>
       )}
     </div>
