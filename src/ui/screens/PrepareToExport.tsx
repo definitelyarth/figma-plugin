@@ -7,6 +7,7 @@ import Accordion from "../components/Accordion";
 import CheckIcon from "../icons/CheckIcon";
 import AlertOctagon from "../icons/AlertOctagon";
 import AlertTriangle from "../icons/AlertTriangle";
+import FrameIcon from "../icons/FrameIcon";
 
 const PrepareToExport = () => {
   const { selection } = useScreenContext();
@@ -44,7 +45,7 @@ const PrepareToExport = () => {
             </div>
           </div>
           <Accordion
-            items={Object.keys(selection.annotations).map((k) => {
+            items={Object.keys(selection.annotations).map((k, idx) => {
               const frame = selection.annotations[k];
               const error = frame.annotations.findIndex(
                 (e) => e.type === "error"
@@ -83,6 +84,7 @@ const PrepareToExport = () => {
                 title: selection.annotations[k].name,
                 error: error !== -1,
                 warning: warning !== -1,
+                Icon: <FrameIcon />,
               };
             })}
           />

@@ -1,7 +1,7 @@
 import { FC } from "preact/compat";
 import { useState } from "preact/hooks";
 import { h } from "preact";
-import FrameIcon from "../icons/FrameIcon";
+
 import { IconChevronDown16, IconChevronUp16 } from "@create-figma-plugin/ui";
 import AlertOctagon from "../icons/AlertOctagon";
 import AlertTriangle from "../icons/AlertTriangle";
@@ -11,6 +11,7 @@ type AccordionItemProps = {
   content: h.JSX.Element;
   error?: boolean;
   warning?: boolean;
+  Icon: h.JSX.Element;
 };
 
 const AccordionItem: FC<AccordionItemProps> = ({
@@ -18,6 +19,7 @@ const AccordionItem: FC<AccordionItemProps> = ({
   content,
   error,
   warning,
+  Icon,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const toggleOpen = () => {
@@ -31,7 +33,7 @@ const AccordionItem: FC<AccordionItemProps> = ({
       >
         <div className="flex justify-between items-center text-xs">
           <div className="flex gap-2 items-center font-semibold">
-            <FrameIcon />
+            {Icon}
             <span>{title}</span>
           </div>
           <div className={"flex gap-2"}>
@@ -70,7 +72,7 @@ type AccordionProps = {
 
 const Accordion: FC<AccordionProps> = ({ items }) => {
   return (
-    <div className="w-full mx-auto bg-white rounded-md px-2">
+    <div className="w-full mx-auto bg-white rounded-md px-2 overflow-scroll">
       {items.map((item, index) => (
         <AccordionItem
           key={index}
@@ -78,6 +80,7 @@ const Accordion: FC<AccordionProps> = ({ items }) => {
           content={item.content}
           error={item.error}
           warning={item.warning}
+          Icon={item.Icon}
         />
       ))}
     </div>

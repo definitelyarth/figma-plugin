@@ -8,6 +8,7 @@ import { useIsLoggedIn } from "../state/queries";
 import { emit } from "@create-figma-plugin/utilities";
 import { TransformOutput } from "../../transformers/types";
 import ReadyForExport from "../screens/ReadyForExport";
+import { Variant } from "src/types";
 
 type ScreenContextT = {
   currStep: number;
@@ -18,6 +19,7 @@ type ScreenContextT = {
   userId: string | null;
   sessionId: string | null;
   finalDoc: TransformOutput["doc"] | null;
+  preview: undefined | Variant[];
   setFinalDoc: Dispatch<SetStateAction<TransformOutput["doc"] | null>>;
 };
 
@@ -31,11 +33,13 @@ const screenContext = createContext<ScreenContextT>({
   sessionId: null,
   finalDoc: null,
   setFinalDoc: () => {},
+  preview: undefined,
 });
 
 const ScreenContextProvider: FC = ({ children }) => {
   const [selection, setSelection] = useState<undefined | TransformOutput>();
   const [finalDoc, setFinalDoc] = useState<null | TransformOutput["doc"]>(null);
+  const [preview, setPreview] = useState<Variant[] | undefined>(undefined);
 
   const [userId, setUserId] = useState<null | string>(null);
   const [sessionId, setSessionId] = useState<null | string>(null);
@@ -61,6 +65,8 @@ const ScreenContextProvider: FC = ({ children }) => {
         }
       } else if (event.event === "selection") {
         setSelection(event.data as TransformOutput);
+      } else if (event.event === "preview-export") {
+        setPreview(event.data as Variant[]);
       }
     };
 
@@ -95,6 +101,7 @@ const ScreenContextProvider: FC = ({ children }) => {
   return (
     <screenContext.Provider
       value={{
+        preview,
         finalDoc,
         setFinalDoc,
         selection,

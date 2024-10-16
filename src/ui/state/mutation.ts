@@ -25,11 +25,11 @@ const useMutatePopulateImages = () => {
           const imageNode =
             data.doc.children![position.canvasIdx].children![position.frameIdx]
               .children![image.idx];
-          console.log({ image, position, imageNode });
           if (imageNode.type === "IMAGE") imageNode.url = obj.uploadedUrl;
         }
       }
       setFinalDoc(data.doc);
+      return data.doc;
     },
   });
 };

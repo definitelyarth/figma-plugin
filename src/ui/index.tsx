@@ -39,7 +39,10 @@ const MainUI = () => {
             disabled={selection === undefined || isLoading || isError}
             onClick={async () => {
               if (currStep === 0) {
-                await mutateAsync({ data: selection as TransformOutput });
+                const doc = await mutateAsync({
+                  data: selection as TransformOutput,
+                });
+                if (doc) emit("preview-export", doc);
                 nextStep();
               } else if (currStep === 1) {
                 if (finalDoc) downloadRktm(finalDoc);

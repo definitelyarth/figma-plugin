@@ -152,7 +152,6 @@ export const transformCanvas = async (
   let canvasId = 0;
   let idx = 0;
   for await (const frameNode of page.selection) {
-    console.log({ id: frameNode.id });
     if (frameNode.type !== "FRAME") continue;
     const transformer = new FigmaFrameToRktmFrame(
       frameNode,
@@ -165,17 +164,12 @@ export const transformCanvas = async (
       annotations: frameData.annotations,
       name: frameData.frame.name,
     };
-    console.log({ frame: frameData.frame });
     let found = false;
     for (const [canvasIdx, variantArray] of document.children!.entries()) {
       if (found) break;
       for (const variant of variantArray.children!) {
         if (found) break;
         const areSame = AreSameVariant(variant, frameData.frame);
-        console.log({
-          variant: { id: variant.id, children: variant.children },
-          curr: { id: frameNode.id, children: frameData.frame.children },
-        });
         if (areSame) {
           variantArray.children!.push(frameData.frame);
           found = true;
@@ -200,7 +194,6 @@ export const transformCanvas = async (
         frameIdx: 0,
       };
     }
-    console.log({ frameIdToLocation });
   }
 
   return {

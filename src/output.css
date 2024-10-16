@@ -639,6 +639,10 @@ video {
   height: 100vh;
 }
 
+.h-\[60px\] {
+  height: 60px;
+}
+
 .min-h-full {
   min-height: 100%;
 }
@@ -676,6 +680,10 @@ video {
   width: 100vw;
 }
 
+.w-\[60px\] {
+  width: 60px;
+}
+
 .min-w-full {
   min-width: 100%;
 }
@@ -694,6 +702,10 @@ video {
 
 .max-w-lg {
   max-width: 32rem;
+}
+
+.max-w-\[60px\] {
+  max-width: 60px;
 }
 
 .transform {
