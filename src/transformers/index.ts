@@ -55,7 +55,8 @@ class FigmaFrameToRktmFrame {
       !isTopLevelFrame &&
       node.type === "FRAME" &&
       typeof node.fills !== "symbol" &&
-      node.fills.length != 0
+      node.fills.length != 0 &&
+      node.visible
     ) {
       const vector = new VectorTransformer(
         node,
@@ -66,6 +67,7 @@ class FigmaFrameToRktmFrame {
       vector.export();
     }
     for await (const n of node.children) {
+      if (!n.visible) continue;
       if (n.type === "FRAME") {
         await this.recurse(n, xOffset + n.x, yOffset + n.y);
       } else if (n.type === "GROUP") {
@@ -152,7 +154,7 @@ export const transformCanvas = async (
   let canvasId = 0;
   let idx = 0;
   for await (const frameNode of page.selection) {
-    if (frameNode.type !== "FRAME") continue;
+    if (frameNode.type !== "FRAME" || !frameNode.visible) continue;
     const transformer = new FigmaFrameToRktmFrame(
       frameNode,
       IdStore,
