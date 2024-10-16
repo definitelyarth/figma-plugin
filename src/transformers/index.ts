@@ -1,11 +1,5 @@
 import TextNodeTransformer from "./textNode.transformer";
-import {
-  CanvasNode,
-  Color,
-  DocumentNode,
-  FrameNode,
-  DocumentNode as RktmDocumentNode,
-} from "../types/rpf";
+import { DocumentNode, FrameNode } from "../types/rpf";
 import { figmaFillsToRktmPaint } from "./utils";
 import { VectorTransformer } from "./shapeNode.transformer";
 import {
@@ -60,8 +54,8 @@ class FigmaFrameToRktmFrame {
     ) {
       const vector = new VectorTransformer(
         node,
-        xOffset,
-        yOffset,
+        xOffset - node.x,
+        yOffset - node.y,
         this.executionContext
       );
       vector.export();
