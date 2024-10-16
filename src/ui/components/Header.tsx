@@ -1,28 +1,11 @@
-import { h, JSX } from "preact";
+import { h } from "preact";
 import Gear from "../icons/Gear";
-import { Modal } from "@create-figma-plugin/ui";
-import { Button } from "./Button";
-import { useState } from "preact/hooks";
+import Dropdown from "./DropDown";
+import LogoutIcon from "../icons/LogoutIcon";
+import { useMutateLogout } from "../state/mutation";
 
 const Header = () => {
-  const [open, setOpen] = useState<boolean>(false);
-  function handleOpenButtonClick(
-    event: JSX.TargetedMouseEvent<HTMLButtonElement>
-  ) {
-    console.log(event);
-    setOpen(true);
-  }
-  function handleCloseButtonClick(
-    event: JSX.TargetedMouseEvent<HTMLButtonElement>
-  ) {
-    console.log(event);
-    setOpen(false);
-  }
-  const style = {
-    height: "160px",
-    padding: "12px",
-    width: "240px",
-  };
+  const { mutateAsync: logout } = useMutateLogout();
 
   return (
     <div
@@ -32,14 +15,28 @@ const Header = () => {
       <span className={"border-b-2 border-brand text-black py-2 px-2"}>
         Frames
       </span>
-      <span onClick={handleOpenButtonClick} className={"cursor-pointer"}>
-        <Gear />
+      <span className={"cursor-pointer"}>
+        <Dropdown
+          label={<Gear />}
+          onSelect={console.log}
+          options={[
+            {
+              element: (
+                <div
+                  className={
+                    "flex gap-2 w-full text-alert p-2 rounded-xl items-center cursor-pointer"
+                  }
+                >
+                  <LogoutIcon /> Logout
+                </div>
+              ),
+              onClick: () => {
+                logout();
+              },
+            },
+          ]}
+        />
       </span>
-      <Modal open={open}>
-        <div style={style}>
-          <Button onClick={handleCloseButtonClick}>Close</Button>
-        </div>
-      </Modal>
     </div>
   );
 };

@@ -32,6 +32,14 @@ const useMutatePopulateImages = () => {
   });
 };
 
+const useMutateLogout = () =>
+  useMutation({
+    mutationFn: async () => {
+      emit("set-value", { key: "userId", value: null });
+      emit("set-value", { key: "sessionId", value: null });
+    },
+  });
+
 const useMutateLogin = () =>
   useMutation({
     mutationFn: async ({
@@ -86,4 +94,4 @@ const useMutateLogin = () =>
     },
   });
 
-export { useMutateLogin, useMutatePopulateImages };
+export { useMutateLogin, useMutateLogout, useMutatePopulateImages };
