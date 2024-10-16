@@ -13,8 +13,13 @@ export default function () {
     if (
       figma.currentPage.selection.findIndex((e) => e.type === "FRAME") != -1
     ) {
-      const output = await transformCanvas(figma.currentPage);
-      figma.ui.postMessage({ event: "selection", data: output });
+      try {
+        const output = await transformCanvas(figma.currentPage);
+        figma.ui.postMessage({ event: "selection", data: output });
+      } catch (e) {
+        console.error(e);
+        figma.ui.postMessage({ event: "selection", data: undefined });
+      }
     } else {
       figma.ui.postMessage({ event: "selection", data: undefined });
     }

@@ -231,7 +231,14 @@ class ImageTransformer extends Transformer<
     this.executionContext.annotations.push(...this.annotations);
     this.executionContext.frameChildNodes.push(out);
     const figmaImage = figma.getImageByHash(out.url) as Image;
-    const bytes = await figmaImage.getBytesAsync();
+    let bytes = new Uint8Array();
+    try {
+      bytes = await figmaImage.getBytesAsync();
+    } catch (e) {
+      bytes = await this.node.node.exportAsync({ format: "PNG" });
+      console.error(e);
+      console.log({ id, name: this.node.node.name });
+    }
     const image = {
       figmaFrameId: this.executionContext.figmaFrameId,
       idx: this.executionContext.frameChildNodes.length - 1,
