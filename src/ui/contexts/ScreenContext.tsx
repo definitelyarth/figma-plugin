@@ -6,7 +6,7 @@ import PrepareToExport from "../screens/PrepareToExport";
 import Loader from "../components/Loader";
 import { useIsLoggedIn } from "../state/queries";
 import { emit } from "@create-figma-plugin/utilities";
-import { Cluster, TransformOutput } from "../../transformers/types";
+import { TransformOutput } from "../../transformers/types";
 import ReadyForExport from "../screens/ReadyForExport";
 
 type ScreenContextT = {

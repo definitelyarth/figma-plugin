@@ -132,11 +132,9 @@ class ImageTransformer extends Transformer<
     shape: ShapeNode,
     ctx: ExecutionContext,
     xOffset: number,
-    yOffset: number
+    yOffset: number,
+    figmaFrameId: string
   ) {
-    // const hash = (
-    //   // await Gzip(await shape.exportAsync({ format: "PNG" }))
-    // ).toString();
     const hash = "";
 
     const id = ctx.generateIdForChildNode({ type: "IMAGE", hash });
@@ -154,10 +152,8 @@ class ImageTransformer extends Transformer<
     };
 
     ctx.frameChildNodes.push(out);
-
     const image = {
-      frameIdx: ctx.frameIdx,
-      id: out.id,
+      figmaFrameId,
       idx: ctx.frameChildNodes.length - 1,
     };
 
@@ -234,8 +230,7 @@ class ImageTransformer extends Transformer<
     const figmaImage = figma.getImageByHash(out.url) as Image;
     const bytes = await figmaImage.getBytesAsync();
     const image = {
-      frameIdx: this.executionContext.frameIdx,
-      id: out.id,
+      figmaFrameId: this.executionContext.figmaFrameId,
       idx: this.executionContext.frameChildNodes.length - 1,
     };
 

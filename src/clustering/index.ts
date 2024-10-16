@@ -1,16 +1,18 @@
-import { Cluster } from "src/transformers/types";
-import { CanvasNode, FrameNode } from "src/types/rpf";
+import { FrameNode } from "src/types/rpf";
 
 export const generateSizeKey = (width: number, height: number) => {
   return `${width}x${height}`;
 };
 
-export const AreSameVariant = (frameA: FrameNode, frameB: FrameNode) => {
+export const AreSameVariant = (oframeA: FrameNode, oframeB: FrameNode) => {
   if (
-    frameA.absoluteBoundingBox.width === frameB.absoluteBoundingBox.width &&
-    frameA.absoluteBoundingBox.height === frameB.absoluteBoundingBox.height
+    oframeA.absoluteBoundingBox.width === oframeB.absoluteBoundingBox.width &&
+    oframeA.absoluteBoundingBox.height === oframeB.absoluteBoundingBox.height
   )
     return false;
+
+  const frameA = { ...oframeA, children: [...oframeA.children!] };
+  const frameB = { ...oframeA, children: [...oframeB.children!] };
 
   let bigger = frameA;
   let smaller = frameB;
@@ -33,6 +35,5 @@ export const AreSameVariant = (frameA: FrameNode, frameB: FrameNode) => {
       }
     }
   }
-  console.log({ countMatched, smaller, bigger });
   return countMatched === smaller.children!.length;
 };

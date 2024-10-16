@@ -40,7 +40,6 @@ const MainUI = () => {
             onClick={async () => {
               if (currStep === 0) {
                 await mutateAsync({ data: selection as TransformOutput });
-                emit("cluster", finalDoc?.children![0]);
                 nextStep();
               } else if (currStep === 1) {
                 if (finalDoc) downloadRktm(finalDoc);

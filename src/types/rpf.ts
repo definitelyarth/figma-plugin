@@ -3,7 +3,7 @@ export interface BaseNode<T extends string, C = undefined> {
   readonly name: string;
   readonly visible?: boolean;
   readonly type: T;
-  readonly children?: C[];
+  children?: C[];
   readonly source?: string;
   readonly link?: string;
 }

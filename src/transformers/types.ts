@@ -1,12 +1,4 @@
-import { DocumentNode, FrameChildNode, FrameNode } from "../types/rpf";
-
-export type Cluster = {
-  size: string;
-  frame: {
-    frame: FrameNode;
-    preview: Uint8Array;
-  };
-}[];
+import { DocumentNode, FrameChildNode } from "../types/rpf";
 
 export type RktmNodeType = "TEXT" | "SHAPE" | "IMAGE";
 
@@ -35,9 +27,8 @@ export type ImageMap = Record<
     state: ImageState;
     uploadedUrl?: string;
     images: {
-      id: string;
+      figmaFrameId: string;
       idx: number;
-      frameIdx: number;
     }[];
     name: string;
     bytes: Uint8Array;
@@ -46,6 +37,7 @@ export type ImageMap = Record<
 >;
 
 export type ExecutionContext = {
+  figmaFrameId: string;
   IdStore: IdStore;
   frameChildNodes: FrameChildNode[];
   annotations: Annotation[];
@@ -71,4 +63,5 @@ export type TransformOutput = {
     }
   >;
   imageMap: ImageMap;
+  frameIdToLocation: Record<string, { canvasIdx: number; frameIdx: number }>;
 };

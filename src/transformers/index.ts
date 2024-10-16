@@ -13,7 +13,6 @@ import {
   ExecutionContext,
   IdStore,
   ImageMap,
-  RktmNodeType,
   TransformOutput,
 } from "./types";
 import { AreSameVariant, generateSizeKey } from "src/clustering";
@@ -28,6 +27,7 @@ class FigmaFrameToRktmFrame {
     imageMap: ImageMap
   ) {
     this.executionContext = {
+      figmaFrameId: this.input.id,
       frameIdx,
       annotations: [],
       frameChildNodes: [],
@@ -145,9 +145,14 @@ export const transformCanvas = async (
     SHAPE: { map: new Map<string, string>(), lastId: -1 },
     IMAGE: { map: new Map<string, string>(), lastId: -1 },
   };
+  const frameIdToLocation: Record<
+    string,
+    { canvasIdx: number; frameIdx: number }
+  > = {};
   let canvasId = 0;
   let idx = 0;
   for await (const frameNode of page.selection) {
+    console.log({ id: frameNode.id });
     if (frameNode.type !== "FRAME") continue;
     const transformer = new FigmaFrameToRktmFrame(
       frameNode,
@@ -160,16 +165,24 @@ export const transformCanvas = async (
       annotations: frameData.annotations,
       name: frameData.frame.name,
     };
+    console.log({ frame: frameData.frame });
     let found = false;
-    for (const variantArray of document.children!) {
+    for (const [canvasIdx, variantArray] of document.children!.entries()) {
       if (found) break;
       for (const variant of variantArray.children!) {
         if (found) break;
         const areSame = AreSameVariant(variant, frameData.frame);
-        console.log({ areSame });
+        console.log({
+          variant: { id: variant.id, children: variant.children },
+          curr: { id: frameNode.id, children: frameData.frame.children },
+        });
         if (areSame) {
           variantArray.children!.push(frameData.frame);
           found = true;
+          frameIdToLocation[frameNode.id] = {
+            canvasIdx,
+            frameIdx: variantArray.children!.length - 1,
+          };
         }
       }
     }
@@ -182,8 +195,18 @@ export const transformCanvas = async (
         visible: true,
       });
       canvasId++;
+      frameIdToLocation[frameNode.id] = {
+        canvasIdx: document.children!.length - 1,
+        frameIdx: 0,
+      };
     }
+    console.log({ frameIdToLocation });
   }
 
-  return { doc: document, annotations: framesData, imageMap };
+  return {
+    doc: document,
+    annotations: framesData,
+    imageMap,
+    frameIdToLocation,
+  };
 };

@@ -10,7 +10,6 @@ const useMutatePopulateImages = () => {
   return useMutation({
     mutationFn: async ({ data }: { data: TransformOutput }) => {
       if (!userId || !sessionId) return;
-      const canvas = data.doc.children![0];
       for await (const hash of Object.keys(data.imageMap)) {
         const obj = data.imageMap[hash];
         obj.state == "IN_PROGRESS";
@@ -21,8 +20,12 @@ const useMutatePopulateImages = () => {
         });
         obj.uploadedUrl = key;
         for (const image of obj.images) {
+          const position = data.frameIdToLocation[image.figmaFrameId];
+
           const imageNode =
-            canvas.children![image.frameIdx].children![image.idx];
+            data.doc.children![position.canvasIdx].children![position.frameIdx]
+              .children![image.idx];
+          console.log({ image, position, imageNode });
           if (imageNode.type === "IMAGE") imageNode.url = obj.uploadedUrl;
         }
       }
