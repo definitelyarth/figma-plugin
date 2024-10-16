@@ -95,6 +95,7 @@ class VectorTransformer extends Transformer<ShapeNode | FrameNode, VectorNode> {
         border: borderData,
         effects: effectsData.data,
       },
+      visible: this.node.visible,
     };
 
     if (fillsData.data.image) {
@@ -149,6 +150,7 @@ class ImageTransformer extends Transformer<
       styles: {},
       type: "IMAGE",
       zIndex: ++ctx.z,
+      visible: shape.visible,
     };
 
     ctx.frameChildNodes.push(out);
@@ -199,6 +201,7 @@ class ImageTransformer extends Transformer<
     const scaleMode = this.scaleMode(this.node.fill.scaleMode);
     this.annotations.push(...scaleMode.annotations);
     const out: ImageNode = {
+      visible: this.node.node.visible,
       type: "IMAGE",
       zIndex: ++this.executionContext.z,
       height: this.node.node.height,

@@ -67,7 +67,6 @@ class FigmaFrameToRktmFrame {
       vector.export();
     }
     for await (const n of node.children) {
-      if (!n.visible) continue;
       if (n.type === "FRAME") {
         await this.recurse(n, xOffset + n.x, yOffset + n.y);
       } else if (n.type === "GROUP") {
