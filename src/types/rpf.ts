@@ -3,7 +3,7 @@ export interface BaseNode<T extends string, C = undefined> {
   readonly name: string;
   readonly visible?: boolean;
   readonly type: T;
-  readonly children?: ReadonlyArray<C>;
+  readonly children?: C[];
   readonly source?: string;
   readonly link?: string;
 }
@@ -12,9 +12,7 @@ export interface DocumentNode extends BaseNode<"DOCUMENT", CanvasNode> {
   readonly exportSettings?: ReadonlyArray<ExportSetting>;
 }
 
-export interface CanvasNode extends BaseNode<"CANVAS", FrameNode> {
-  readonly backgroundColor: Color;
-}
+export interface CanvasNode extends BaseNode<"CANVAS", FrameNode> {}
 /** more can be added  */
 export type FrameChildNode = TextNode | ImageNode | VectorNode;
 
@@ -70,7 +68,7 @@ export interface TextStyleRun {
 export interface ImageNode extends Layer {
   readonly type: PaintTypeImage;
   /** URL to the image asset */
-  imageUrl: string;
+  url: string;
   /** Width of the image */
   readonly width: number;
   /** Height of the image */

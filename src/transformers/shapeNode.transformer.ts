@@ -146,7 +146,7 @@ class ImageTransformer extends Transformer<
       name: shape.name,
       height: 0,
       width: 0,
-      imageUrl: "",
+      url: "",
       position: { x: xOffset + shape.x, y: yOffset + shape.y },
       styles: {},
       type: "IMAGE",
@@ -213,7 +213,7 @@ class ImageTransformer extends Transformer<
         y: this.node.node.y + this.yOffset,
       },
       id,
-      imageUrl: this.node.fill.imageHash as string,
+      url: this.node.fill.imageHash as string,
       styles: {
         backgroundColor: {
           blendMode: "NORMAL",
@@ -231,7 +231,7 @@ class ImageTransformer extends Transformer<
     };
     this.executionContext.annotations.push(...this.annotations);
     this.executionContext.frameChildNodes.push(out);
-    const figmaImage = figma.getImageByHash(out.imageUrl) as Image;
+    const figmaImage = figma.getImageByHash(out.url) as Image;
     const bytes = await figmaImage.getBytesAsync();
     const image = {
       frameIdx: this.executionContext.frameIdx,

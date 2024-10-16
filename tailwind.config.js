@@ -10,6 +10,7 @@ export default {
         lightestGray: "#F2F4F7",
         alert: "#D92D20",
         warning: "#F79009",
+        neutral900: "#101828",
       },
     },
   },

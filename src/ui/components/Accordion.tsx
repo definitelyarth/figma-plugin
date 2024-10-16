@@ -1,9 +1,10 @@
 import { FC } from "preact/compat";
 import { useState } from "preact/hooks";
 import { h } from "preact";
-import AlertTriangleIcon from "../icons/AlertTriangleIcon";
-import WarningIcon from "../icons/WarningIcon";
 import FrameIcon from "../icons/FrameIcon";
+import { IconChevronDown16, IconChevronUp16 } from "@create-figma-plugin/ui";
+import AlertOctagon from "../icons/AlertOctagon";
+import AlertTriangle from "../icons/AlertTriangle";
 
 type AccordionItemProps = {
   title: string;
@@ -19,7 +20,6 @@ const AccordionItem: FC<AccordionItemProps> = ({
   warning,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  console.log({ error });
   const toggleOpen = () => {
     setIsOpen(!isOpen);
   };
@@ -30,7 +30,7 @@ const AccordionItem: FC<AccordionItemProps> = ({
         onClick={toggleOpen}
       >
         <div className="flex justify-between items-center text-xs">
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center font-semibold">
             <FrameIcon />
             <span>{title}</span>
           </div>
@@ -38,22 +38,28 @@ const AccordionItem: FC<AccordionItemProps> = ({
             <div className={"flex gap-2 items-center"}>
               {error && (
                 <div className={"flex gap-2 items-center text-alert"}>
-                  <AlertTriangleIcon />
+                  <AlertOctagon height={12} width={12} />
                   Error
                 </div>
               )}
               {warning && (
                 <div className={"flex gap-2 items-center text-warning"}>
-                  <WarningIcon />
+                  <AlertTriangle height={12} width={12} />
                   Warning
                 </div>
               )}
             </div>
-            <span>{isOpen ? "-" : "+"}</span>
+            <span className={"cursor-pointer"}>
+              {isOpen ? (
+                <IconChevronUp16 className={"text-brand"} />
+              ) : (
+                <IconChevronDown16 className={"text-brand"} />
+              )}
+            </span>
           </div>
         </div>
       </div>
-      {isOpen && <div className="px-4 py-2 text-gray-700">{content}</div>}
+      {isOpen && <div className="py-2">{content}</div>}
     </div>
   );
 };

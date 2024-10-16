@@ -1,5 +1,6 @@
 import { on, showUI } from "@create-figma-plugin/utilities";
 import { transformCanvas } from "./transformers";
+import { CanvasNode } from "./types/rpf";
 
 export default function () {
   showUI({

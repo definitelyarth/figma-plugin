@@ -2,6 +2,7 @@ import TextNodeTransformer from "./textNode.transformer";
 import {
   CanvasNode,
   Color,
+  DocumentNode,
   FrameNode,
   DocumentNode as RktmDocumentNode,
 } from "../types/rpf";
@@ -15,6 +16,7 @@ import {
   RktmNodeType,
   TransformOutput,
 } from "./types";
+import { AreSameVariant, generateSizeKey } from "src/clustering";
 
 class FigmaFrameToRktmFrame {
   executionContext: ExecutionContext;
@@ -46,9 +48,15 @@ class FigmaFrameToRktmFrame {
   async recurse(
     node: globalThis.FrameNode | globalThis.GroupNode,
     xOffset: number,
-    yOffset: number
+    yOffset: number,
+    isTopLevelFrame?: boolean
   ) {
-    if (node.type === "FRAME" && typeof node.fills !== "symbol") {
+    if (
+      !isTopLevelFrame &&
+      node.type === "FRAME" &&
+      typeof node.fills !== "symbol" &&
+      node.fills.length != 0
+    ) {
       const vector = new VectorTransformer(
         node,
         xOffset,
@@ -90,7 +98,7 @@ class FigmaFrameToRktmFrame {
   }
 
   async export(): Promise<{ frame: FrameNode; annotations: Annotation[] }> {
-    await this.recurse(this.input, 0, 0);
+    await this.recurse(this.input, 0, 0, true);
     return {
       frame: {
         backgroundColor: figmaFillsToRktmPaint(
@@ -117,7 +125,14 @@ class FigmaFrameToRktmFrame {
 export const transformCanvas = async (
   page: PageNode
 ): Promise<TransformOutput> => {
-  const frames: FrameNode[] = [];
+  const document: DocumentNode = {
+    id: page.id,
+    name: page.name,
+    type: "DOCUMENT",
+    children: [],
+    source: "figma",
+    visible: true,
+  };
 
   const framesData: Record<
     string,
@@ -130,6 +145,7 @@ export const transformCanvas = async (
     SHAPE: { map: new Map<string, string>(), lastId: -1 },
     IMAGE: { map: new Map<string, string>(), lastId: -1 },
   };
+  let canvasId = 0;
   let idx = 0;
   for await (const frameNode of page.selection) {
     if (frameNode.type !== "FRAME") continue;
@@ -144,29 +160,30 @@ export const transformCanvas = async (
       annotations: frameData.annotations,
       name: frameData.frame.name,
     };
-    frames.push(frameData.frame);
-    idx++;
+    let found = false;
+    for (const variantArray of document.children!) {
+      if (found) break;
+      for (const variant of variantArray.children!) {
+        if (found) break;
+        const areSame = AreSameVariant(variant, frameData.frame);
+        console.log({ areSame });
+        if (areSame) {
+          variantArray.children!.push(frameData.frame);
+          found = true;
+        }
+      }
+    }
+    if (!found) {
+      document.children!.push({
+        id: `${canvasId}`,
+        type: "CANVAS",
+        name: `variant-${canvasId}`,
+        children: [frameData.frame],
+        visible: true,
+      });
+      canvasId++;
+    }
   }
 
-  const RktmCanvas: CanvasNode = {
-    id: page.id,
-    link: "",
-    name: page.name,
-    type: "CANVAS",
-    visible: true,
-    children: frames,
-    backgroundColor: figmaFillsToRktmPaint(page, page.backgrounds).data.paint
-      .color as Color,
-  };
-
-  const RktmDocument: RktmDocumentNode = {
-    id: figma.root.id,
-    name: figma.root.name,
-    link: "some-document-link",
-    type: "DOCUMENT",
-    children: [RktmCanvas],
-    source: "figma",
-  };
-
-  return { doc: RktmDocument, annotations: framesData, imageMap };
+  return { doc: document, annotations: framesData, imageMap };
 };

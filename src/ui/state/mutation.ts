@@ -6,7 +6,7 @@ import { useScreenContext } from "../contexts/ScreenContext";
 import { uploadFileToS3 } from "src/storage/s3";
 
 const useMutatePopulateImages = () => {
-  const { userId, sessionId, nextStep, setFinalDoc } = useScreenContext();
+  const { userId, sessionId, setFinalDoc } = useScreenContext();
   return useMutation({
     mutationFn: async ({ data }: { data: TransformOutput }) => {
       if (!userId || !sessionId) return;
@@ -23,11 +23,10 @@ const useMutatePopulateImages = () => {
         for (const image of obj.images) {
           const imageNode =
             canvas.children![image.frameIdx].children![image.idx];
-          if (imageNode.type === "IMAGE") imageNode.imageUrl = obj.uploadedUrl;
+          if (imageNode.type === "IMAGE") imageNode.url = obj.uploadedUrl;
         }
       }
       setFinalDoc(data.doc);
-      nextStep();
     },
   });
 };

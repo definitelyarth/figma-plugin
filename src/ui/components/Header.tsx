@@ -18,7 +18,6 @@ const Header = () => {
       <span className={"cursor-pointer"}>
         <Dropdown
           label={<Gear />}
-          onSelect={console.log}
           options={[
             {
               element: (

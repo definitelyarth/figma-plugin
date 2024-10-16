@@ -1,22 +1,15 @@
 import { useState, useRef, useEffect, FC } from "react";
 import { h } from "preact";
 
-// Define the props type for the Dropdown
-interface DropdownProps<T> {
+interface DropdownProps {
   label: h.JSX.Element;
   options: { element: h.JSX.Element; onClick: () => void }[];
-  onSelect: (option: T) => void;
 }
 
-const Dropdown = <T extends string | number | object>({
-  label,
-  options,
-  onSelect,
-}: DropdownProps<T>) => {
+const Dropdown = ({ label, options }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close the dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -32,10 +25,9 @@ const Dropdown = <T extends string | number | object>({
     };
   }, []);
 
-  // Handle option selection
   const handleSelect = (onClick: () => void) => {
     onClick();
-    setIsOpen(false); // Close the dropdown
+    setIsOpen(false);
   };
 
   return (

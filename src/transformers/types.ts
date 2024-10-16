@@ -1,4 +1,12 @@
-import { DocumentNode, FrameChildNode } from "../types/rpf";
+import { DocumentNode, FrameChildNode, FrameNode } from "../types/rpf";
+
+export type Cluster = {
+  size: string;
+  frame: {
+    frame: FrameNode;
+    preview: Uint8Array;
+  };
+}[];
 
 export type RktmNodeType = "TEXT" | "SHAPE" | "IMAGE";
 

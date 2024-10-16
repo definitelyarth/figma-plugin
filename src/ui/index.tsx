@@ -7,9 +7,11 @@ import { useMutatePopulateImages } from "./state/mutation";
 import { TransformOutput } from "src/transformers/types";
 import { downloadRktm } from "./utils/download";
 import Loader from "./components/Loader";
+import { emit } from "@create-figma-plugin/utilities";
 
 const MainUI = () => {
-  const { CurrScreen, selection, currStep, finalDoc } = useScreenContext();
+  const { CurrScreen, selection, currStep, finalDoc, nextStep } =
+    useScreenContext();
   const { mutateAsync, isLoading, isError } = useMutatePopulateImages();
 
   return (
@@ -38,6 +40,8 @@ const MainUI = () => {
             onClick={async () => {
               if (currStep === 0) {
                 await mutateAsync({ data: selection as TransformOutput });
+                emit("cluster", finalDoc?.children![0]);
+                nextStep();
               } else if (currStep === 1) {
                 if (finalDoc) downloadRktm(finalDoc);
               }
