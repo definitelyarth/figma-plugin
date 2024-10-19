@@ -32,7 +32,7 @@ const AccordionItem: FC<AccordionItemProps> = ({
         onClick={toggleOpen}
       >
         <div className="flex justify-between items-center text-xs">
-          <div className="flex gap-2 items-center font-semibold">
+          <div className="flex gap-2 items-center font-semibold text-black">
             {Icon}
             <span>{title}</span>
           </div>

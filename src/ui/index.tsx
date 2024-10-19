@@ -8,6 +8,8 @@ import { TransformOutput } from "src/transformers/types";
 import { downloadRktm } from "./utils/download";
 import Loader from "./components/Loader";
 import { emit } from "@create-figma-plugin/utilities";
+import { Message } from "protobufjs";
+import { DocumentNode } from "src/schema/compiled";
 
 const MainUI = () => {
   const { CurrScreen, selection, currStep, finalDoc, nextStep } =
@@ -45,7 +47,9 @@ const MainUI = () => {
                 if (doc) emit("preview-export", doc);
                 nextStep();
               } else if (currStep === 1) {
-                if (finalDoc) downloadRktm(finalDoc);
+                if (finalDoc) {
+                  downloadRktm(finalDoc as DocumentNode);
+                }
               }
             }}
           >

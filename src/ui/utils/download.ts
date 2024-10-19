@@ -1,8 +1,15 @@
-import { DocumentNode } from "src/types/rpf";
+import { DocumentNode } from "../../schema/compiled";
+import { DocumentNode as RktmDocument } from "src/types/rpf";
+import { RocketiumPortableFormat } from "rocketium-types";
 
 const downloadRktm = (rocketiumDocument: DocumentNode) => {
+  const doc = DocumentNode.create(rocketiumDocument);
+  console.log({ doc });
+  const data = DocumentNode.encode(doc).finish();
+  const decoded = DocumentNode.decode(data);
+  console.log({ decoded });
   const blobURL = window.URL.createObjectURL(
-    new Blob([JSON.stringify(rocketiumDocument)], { type: "application/json" })
+    new Blob([data], { type: "base64" })
   );
   const link = document.createElement("a");
   link.href = blobURL;

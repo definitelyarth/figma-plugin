@@ -93,7 +93,8 @@ class VectorTransformer extends Transformer<ShapeNode | FrameNode, VectorNode> {
       rotation: this.node.rotation,
       styles: {
         border: borderData,
-        effects: effectsData.data,
+        effects: effectsData.data.effects,
+        blur: effectsData.data.blur,
       },
       visible: this.node.visible,
     };
@@ -200,6 +201,11 @@ class ImageTransformer extends Transformer<
     });
     const scaleMode = this.scaleMode(this.node.fill.scaleMode);
     this.annotations.push(...scaleMode.annotations);
+    const effects = figmaEffectsToRktmShapeEffects(
+      this.node.node,
+      this.node.node.effects
+    );
+    this.annotations.push(...effects.annotations);
     const out: ImageNode = {
       visible: this.node.node.visible,
       type: "IMAGE",
@@ -226,7 +232,10 @@ class ImageTransformer extends Transformer<
           figmaTransformMatrixToTranslateAndRotation(
             this.node.fill.imageTransform
           ),
+        effects: effects.data.effects,
+        blur: effects.data.blur,
       },
+      rotation: this.node.node.rotation,
     };
     this.executionContext.annotations.push(...this.annotations);
     this.executionContext.frameChildNodes.push(out);
@@ -260,7 +269,7 @@ class ImageTransformer extends Transformer<
 const figmaEffectsToRktmShapeEffects = (
   node: SceneNode,
   effects: Effect[] | readonly Effect[]
-): WithAnnotations<VectorEffect[]> => {
+): WithAnnotations<{ effects: VectorEffect[]; blur?: number }> => {
   const finalEffects: VectorEffect[] = [];
   const annotations: Annotation[] = [];
   let blur: undefined | number = undefined;
@@ -274,15 +283,18 @@ const figmaEffectsToRktmShapeEffects = (
         type: "SHADOW",
         blurRadius: effect.radius,
       });
-    } else
+    } else if (effect.type === "LAYER_BLUR") {
+      blur = effect.radius;
+    } else {
       annotations.push({
         message: `Unsupported effect: ${effect.type}. Omitting`,
         type: "error",
         element: { id: node.id, name: node.name },
       });
+    }
   }
 
-  return { data: finalEffects, annotations };
+  return { data: { effects: finalEffects, blur }, annotations };
 };
 
 export { ImageTransformer, VectorTransformer };
