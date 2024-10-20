@@ -1,8 +1,9 @@
 import { BaseElementJSON } from "rocketium-types-arth";
 import { Annotation, FigmaBaseNode, WithAnnotations } from "./types";
 import { FigmaBaseNodeToBorder } from "./utils/styles";
-import Colors from "./utils/colors";
-import Layer from "./utils/layer";
+import { figmaPaintsToRktmFills } from "./utils/colors";
+import { FigmaBlendModeToRpfGlobalCompositeOperation } from "./utils/layer";
+import { SerializedFillType } from "rocketium-types-arth/dist/ColorTypes";
 
 const FigmaBaseNodeToRpfBaseElement = ({
   node,
@@ -19,10 +20,15 @@ const FigmaBaseNodeToRpfBaseElement = ({
 }> => {
   const annotations: Annotation[] = [];
   const border = FigmaBaseNodeToBorder(node);
-
-  const fills = Colors.figmaPaintsToRktmFills(node.fills as Paint[]);
-  const globalCompositeOperation =
-    Layer.FigmaBlendModeToRpfGlobalCompositeOperation(node.blendMode);
+  let fills: {
+    data: { fills: SerializedFillType[] };
+    annotations: Annotation[];
+  } = { data: { fills: [] }, annotations: [] };
+  if (typeof node.fills !== "symbol")
+    fills = figmaPaintsToRktmFills(node.fills);
+  const globalCompositeOperation = FigmaBlendModeToRpfGlobalCompositeOperation(
+    node.blendMode
+  );
   annotations.push(
     ...border.annotations,
     ...fills.annotations,

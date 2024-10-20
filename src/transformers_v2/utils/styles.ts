@@ -1,6 +1,6 @@
 import { Border } from "rocketium-types-arth/dist/ObjectContainerTypes";
 import { Annotation, FigmaBaseNode, WithAnnotations } from "../types";
-import Colors from "./colors";
+import { figmaPaintsToRktmFills } from "./colors";
 
 const FigmaBaseNodeToBorder = (
   node: FigmaBaseNode
@@ -8,7 +8,7 @@ const FigmaBaseNodeToBorder = (
   if (node.type === "TEXT") return { data: { border: {} }, annotations: [] };
   const annotations: Annotation[] = [];
 
-  const colors = Colors.figmaPaintsToRktmFills(node.strokes);
+  const colors = figmaPaintsToRktmFills(node.strokes);
   const borderColor = colors.data.fills.find((e) => typeof e === "string");
   annotations.push(...colors.annotations);
   if (colors.data.fills.findIndex((e) => typeof e !== "string") != -1) {

@@ -9,7 +9,7 @@
     "preact": ">=10",
     "protobufjs": "^7.4.0",
     "react-query": "^3.39.3",
-    "rocketium-types-arth": "0.0.6"
+    "rocketium-types-arth": "0.0.8"
   },
   "devDependencies": {
     "@create-figma-plugin/build": "^3.2.0",

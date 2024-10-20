@@ -1,4 +1,4 @@
-import { CanvasElementWithOverrides } from "rocketium-types";
+import { CanvasElementWithOverrides } from "rocketium-types-arth";
 
 export type ShapeNode =
   | RectangleNode
@@ -7,6 +7,14 @@ export type ShapeNode =
   | PolygonNode
   | StarNode
   | VectorNode;
+
+export type ClusterVariant = {
+  width: number;
+  height: number;
+  id: string;
+  displayName: string;
+  objects: Record<string, CanvasElementWithOverrides>;
+};
 
 export type FigmaBaseNode = TextNode | ShapeNode | FrameNode;
 

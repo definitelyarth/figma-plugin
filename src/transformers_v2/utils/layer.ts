@@ -22,22 +22,20 @@ const BLEND_MODE_MAP: Record<BlendMode, GlobalCompositeOperation | null> = {
   SOFT_LIGHT: "soft-light",
 };
 
-const Layer = {
-  FigmaBlendModeToRpfGlobalCompositeOperation(
-    blendMode: BlendMode
-  ): WithAnnotations<{ globalCompositeOperation: GlobalCompositeOperation }> {
-    const fromFigma = BLEND_MODE_MAP[blendMode];
-    if (fromFigma)
-      return { data: { globalCompositeOperation: fromFigma }, annotations: [] };
-    return {
-      data: { globalCompositeOperation: "source-over" },
-      annotations: [
-        {
-          message: `Unsupported blend mode: ${blendMode}. Using NORMAL`,
-          type: "error",
-        },
-      ],
-    };
-  },
-} as const;
-export default Layer;
+function FigmaBlendModeToRpfGlobalCompositeOperation(
+  blendMode: BlendMode
+): WithAnnotations<{ globalCompositeOperation: GlobalCompositeOperation }> {
+  const fromFigma = BLEND_MODE_MAP[blendMode];
+  if (fromFigma)
+    return { data: { globalCompositeOperation: fromFigma }, annotations: [] };
+  return {
+    data: { globalCompositeOperation: "source-over" },
+    annotations: [
+      {
+        message: `Unsupported blend mode: ${blendMode}. Using NORMAL`,
+        type: "error",
+      },
+    ],
+  };
+}
+export { FigmaBlendModeToRpfGlobalCompositeOperation };

@@ -2,6 +2,7 @@ import { on, showUI } from "@create-figma-plugin/utilities";
 import { transformCanvas } from "./transformers";
 import { CanvasNode } from "./types/rpf";
 import { Size, Variant } from "./types";
+import exportToRPF from "./transformers_v2";
 
 export default function () {
   showUI({
@@ -75,9 +76,10 @@ export default function () {
   });
 
   on("printSelected", () => {
-    figma.currentPage.selection.forEach((e) => {
-      const printObj: Record<string, unknown> = { name: e.name, node: e };
-      console.log(printObj);
-    });
+    exportToRPF("SomeName", figma.currentPage.selection);
+    // .forEach((e) => {
+    //   const printObj: Record<string, unknown> = { name: e.name, node: e };
+    //   console.log(printObj);
+    // });
   });
 }

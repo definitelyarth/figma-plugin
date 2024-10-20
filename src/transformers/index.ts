@@ -10,7 +10,7 @@ import {
   TransformOutput,
 } from "./types";
 import { AreSameVariant, generateSizeKey } from "src/clustering";
-import { RocketiumPortableFormat } from "rocketium-types";
+import { RocketiumPortableFormat } from "rocketium-types-arth";
 
 class FigmaFrameToRktmFrame {
   executionContext: ExecutionContext;
@@ -131,12 +131,8 @@ export const transformCanvas = async (
     canvasData: {
       metadata: {},
       variant: {
-        sizes: { size1: {} },
-        objects: {
-          objectId: {
-            type: "image-container",
-          },
-        },
+        sizes: {},
+        objects: {},
       },
     },
   };

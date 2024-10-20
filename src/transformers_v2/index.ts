@@ -2,13 +2,15 @@ import {
   RocketiumPortableFormat,
   CanvasElementWithOverrides,
 } from "rocketium-types-arth";
-
+import FigmaFrameToRktmSize from "./frame";
+import { ClusterVariant } from "./types";
+import { clusterVariants } from "src/clusters_v2";
 /**
  *
  * variants = {id: string; sizes: {width: number; height: number; objects: CanvasElementWithOverrides[]; }[] }[]
  */
 
-const exportToRPF = (name: string, nodes: SceneNode[]) => {
+const exportToRPF = async (name: string, nodes: readonly SceneNode[]) => {
   const Variants: {
     sizes: Record<
       string,
@@ -24,6 +26,13 @@ const exportToRPF = (name: string, nodes: SceneNode[]) => {
     sizes: {},
     objects: {},
   };
+  const vars: ClusterVariant[] = [];
+  for await (const frameNode of nodes) {
+    if (frameNode.type !== "FRAME" || !frameNode.visible) continue;
+    const transformer = new FigmaFrameToRktmSize(frameNode);
+    const variant = await transformer.export();
+    vars.push(variant);
+  }
 
   const rpf: RocketiumPortableFormat = {
     metadata: {
@@ -33,11 +42,12 @@ const exportToRPF = (name: string, nodes: SceneNode[]) => {
     },
     canvasData: {
       metadata: {},
-      variant: {
-        objects: {},
-        sizes: {},
-      },
+      variant: Variants,
     },
     schemaVersion: "1",
   };
+
+  console.log({ clusters: clusterVariants(vars) });
 };
+
+export default exportToRPF;

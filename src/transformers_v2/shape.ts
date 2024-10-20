@@ -5,7 +5,7 @@ import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
 class FigmaShapeToPath {
   constructor(
     private data: {
-      node: Exclude<ShapeNode, RectangleNode>;
+      node: ShapeNode;
       name: string;
       xOffset: number;
       yOffset: number;

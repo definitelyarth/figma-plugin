@@ -1,6 +1,4 @@
 import { DocumentNode } from "../../schema/compiled";
-import { DocumentNode as RktmDocument } from "src/types/rpf";
-import { RocketiumPortableFormat } from "rocketium-types";
 
 const downloadRktm = (rocketiumDocument: DocumentNode) => {
   const doc = DocumentNode.create(rocketiumDocument);

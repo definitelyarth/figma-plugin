@@ -6,7 +6,7 @@ import {
 import { Annotation, WithAnnotations } from "./types";
 import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
 import { TextStyles } from "src/types";
-import { ObjectPosition } from "rocketium-types-arth/dist/ObjectContainerTypes";
+import { figmaAlignMentsToObjectPosition } from "./utils/layout";
 
 class FigmaTextNodeToTextContainer {
   constructor(
@@ -29,14 +29,6 @@ class FigmaTextNodeToTextContainer {
     });
 
     const baseStyleAndRuns = this.figmaBaseStyleAndOverrides(this.data.node);
-    const figmaAlignMentsToObjectPosition = (
-      h: "LEFT" | "CENTER" | "RIGHT" | "JUSTIFIED",
-      v: "TOP" | "CENTER" | "BOTTOM"
-    ): ObjectPosition => {
-      if (h === "JUSTIFIED") return "custom";
-      if (h === "CENTER" && v === "CENTER") return "center";
-      return `${v.toLowerCase()}-${h.toLowerCase()}` as ObjectPosition;
-    };
 
     const textContainer: TextContainerJSON = {
       ...baseNodeResult.data.baseElement,
