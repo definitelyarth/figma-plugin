@@ -4,7 +4,7 @@ import {
 } from "rocketium-types-arth";
 import FigmaFrameToRktmSize from "./frame";
 import { ClusterVariant } from "./types";
-import { clusterVariants } from "src/clusters_v2";
+import { clustersToCanvases, clusterVariants } from "src/clusters_v2";
 /**
  *
  * variants = {id: string; sizes: {width: number; height: number; objects: CanvasElementWithOverrides[]; }[] }[]
@@ -46,8 +46,10 @@ const exportToRPF = async (name: string, nodes: readonly SceneNode[]) => {
     },
     schemaVersion: "1",
   };
-
-  console.log({ clusters: clusterVariants(vars) });
+  const clusters = clusterVariants(vars);
+  console.log({ clusters });
+  const canvases = clustersToCanvases(clusters);
+  console.log({ canvases });
 };
 
 export default exportToRPF;

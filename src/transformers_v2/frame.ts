@@ -102,6 +102,25 @@ class FigmaFrameToRktmSize {
       node.type === "STAR" ||
       node.type === "LINE"
     ) {
+      if (node.type === "RECTANGLE" && typeof node.fills === "object") {
+        node.fills.forEach((fill) => {
+          if (fill.type === "IMAGE") {
+            const image = new FigmaImageToImageContainer({
+              node,
+              fill,
+              name: node.name,
+              xOffset,
+              yOffset,
+            });
+            const imageContainer = image.transform();
+            this.objects[imageContainer.data.id] = {
+              ...imageContainer.data,
+              zIndex: ++this.z,
+              overrides: {},
+            };
+          }
+        });
+      }
       const fills = node.fills;
       if (
         typeof fills === "symbol" ||

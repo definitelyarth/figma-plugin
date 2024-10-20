@@ -1,4 +1,7 @@
-import { CanvasElementWithOverrides } from "rocketium-types-arth";
+import {
+  CanvasElementJSON,
+  CanvasElementWithOverrides,
+} from "rocketium-types-arth";
 import { ClusterVariant } from "src/transformers_v2/types";
 
 const areVariantsSame = (a: ClusterVariant, b: ClusterVariant) => {
@@ -50,13 +53,57 @@ type CanvasData = {
   };
 };
 
-const clusterObjects = (clusters: ClusterVariant[][]) => {
+const clustersToCanvases = (clusters: ClusterVariant[][]) => {
   const canvases: CanvasData[] = [];
   for (const variant of clusters) {
     const canvasData: CanvasData = { variant: { sizes: {}, objects: {} } };
+    const baseObjectsSize = variant.sort(
+      (a, b) => Object.keys(b.objects).length - Object.keys(a.objects).length
+    )[0];
+    for (const size of variant) {
+      canvasData.variant.sizes[size.id] = {
+        id: size.id,
+        displayName: size.displayName,
+        width: size.width,
+        height: size.height,
+      };
+    }
+    for (const [objectKey, baseObject] of Object.entries(
+      baseObjectsSize.objects
+    )) {
+      for (const size of variant) {
+        if (objectKey in size.objects) {
+          let diff: Record<string, unknown> = {};
+          for (const field of Object.keys(size.objects[objectKey])) {
+            if (
+              JSON.stringify(
+                size.objects[objectKey][
+                  field as keyof (typeof size.objects)[string]
+                ]
+              ) !== JSON.stringify(baseObject[field as keyof typeof baseObject])
+            ) {
+              diff[field] =
+                size.objects[objectKey][
+                  field as keyof (typeof size.objects)[string]
+                ];
+            }
+          }
+          baseObject["overrides"][size.id] =
+            diff as Partial<CanvasElementJSON> & { zIndex: number };
+        } else {
+          baseObject.overrides[size.id] = {
+            zIndex: baseObject.zIndex,
+            visible: false,
+          };
+        }
+      }
+    }
 
+    canvasData.variant.objects = baseObjectsSize.objects;
+    canvases.push(canvasData);
     // find the variant with the most amount of objects
   }
+  return canvases;
 };
 
-export { clusterVariants };
+export { clusterVariants, clustersToCanvases };
