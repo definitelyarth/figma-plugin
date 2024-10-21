@@ -55,6 +55,10 @@ const useMutatePopulateImages = () => {
           variant.variant.objects[newObjKey] = { ...object, id: newObjKey };
           delete variant.variant.objects[key];
         }
+        const sortedObjects = Object.entries(variant.variant.objects)
+          .sort(([, a], [, b]) => a.zIndex - b.zIndex)
+          .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+        variant.variant.objects = sortedObjects;
       });
       setFinalDoc(finalDoc);
       return forPreview;
