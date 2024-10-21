@@ -1,5 +1,5 @@
-import { CanvasElementWithOverrides } from "rocketium-types-arth";
-import { Annotation } from "./types";
+import { CanvasElementWithOverrides } from "rocketium-types";
+import { Annotation, Context } from "./types";
 import { FigmaShapeToPath } from "./shape";
 import FigmaRectangleToRoundedRect from "./rectangle";
 import { FigmaTextNodeToTextContainer } from "./text";
@@ -9,7 +9,8 @@ class FigmaFrameToRktmSize {
   annotations: Annotation[];
   objects: Record<string, CanvasElementWithOverrides>;
   z: number;
-  constructor(private node: FrameNode) {
+
+  constructor(private node: FrameNode, private ctx: Context) {
     this.annotations = [];
     this.objects = {};
     this.z = 0;
@@ -27,7 +28,7 @@ class FigmaFrameToRktmSize {
     isTopLevelFrame?: boolean;
   }) {
     if (node.type === "FRAME" && typeof node.fills === "object") {
-      node.fills.forEach((fill) => {
+      for await (const fill of node.fills) {
         if (fill.type === "IMAGE") {
           const image = new FigmaImageToImageContainer({
             node,
@@ -35,15 +36,16 @@ class FigmaFrameToRktmSize {
             name: node.name,
             xOffset,
             yOffset,
+            ctx: this.ctx,
           });
-          const imageContainer = image.transform();
+          const imageContainer = await image.transform();
           this.objects[imageContainer.data.id] = {
             ...imageContainer.data,
             zIndex: ++this.z,
             overrides: {},
           };
         }
-      });
+      }
     }
     if (
       !isTopLevelFrame &&
@@ -94,33 +96,57 @@ class FigmaFrameToRktmSize {
     xOffset: number;
     yOffset: number;
   }) {
-    if (
-      node.type === "RECTANGLE" ||
+    if (node.type === "RECTANGLE") {
+      if (typeof node.fills !== "object") return;
+      for (const fill of node.fills) {
+        if (fill.type === "IMAGE") {
+          const image = new FigmaImageToImageContainer({
+            node,
+            fill,
+            name: node.name,
+            xOffset,
+            yOffset,
+            ctx: this.ctx,
+          });
+          const imageContainer = await image.transform();
+          this.objects[imageContainer.data.id] = {
+            ...imageContainer.data,
+            zIndex: ++this.z,
+            overrides: {},
+          };
+          this.annotations.push(...imageContainer.annotations);
+        }
+      }
+      if (
+        node.fills.findIndex(
+          (paint) =>
+            paint.type === "SOLID" ||
+            paint.type === "GRADIENT_LINEAR" ||
+            paint.type === "GRADIENT_RADIAL"
+        ) === -1
+      )
+        return;
+
+      const rectangle = new FigmaRectangleToRoundedRect({
+        node,
+        name: node.name,
+        xOffset,
+        yOffset,
+      });
+      const rectangleJSON = rectangle.transform();
+      this.objects[rectangleJSON.data.id] = {
+        ...rectangleJSON.data,
+        zIndex: ++this.z,
+        overrides: {},
+      };
+      this.annotations.push(...rectangleJSON.annotations);
+    } else if (
       node.type === "POLYGON" ||
       node.type === "VECTOR" ||
       node.type === "ELLIPSE" ||
       node.type === "STAR" ||
       node.type === "LINE"
     ) {
-      if (node.type === "RECTANGLE" && typeof node.fills === "object") {
-        node.fills.forEach((fill) => {
-          if (fill.type === "IMAGE") {
-            const image = new FigmaImageToImageContainer({
-              node,
-              fill,
-              name: node.name,
-              xOffset,
-              yOffset,
-            });
-            const imageContainer = image.transform();
-            this.objects[imageContainer.data.id] = {
-              ...imageContainer.data,
-              zIndex: ++this.z,
-              overrides: {},
-            };
-          }
-        });
-      }
       const fills = node.fills;
       if (
         typeof fills === "symbol" ||
@@ -144,6 +170,7 @@ class FigmaFrameToRktmSize {
         zIndex: ++this.z,
         overrides: {},
       };
+      this.annotations.push(...pathJSON.annotations);
     } else if (node.type === "TEXT") {
       const text = new FigmaTextNodeToTextContainer({
         node: node,
@@ -157,6 +184,7 @@ class FigmaFrameToRktmSize {
         zIndex: ++this.z,
         overrides: {},
       };
+      this.annotations.push(...textContainerJSON.annotations);
     }
   }
 

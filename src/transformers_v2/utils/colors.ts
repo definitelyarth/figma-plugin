@@ -1,13 +1,14 @@
-import {
-  IGradientOptionsExtended,
-  SerializedFillType,
-} from "rocketium-types-arth/dist/ColorTypes";
+import { SerializedFillType } from "rocketium-types/dist/ColorTypes";
 import { Annotation, WithAnnotations } from "../types";
 import {
+  IGradientOptions,
   IGradientOptionsColorStops,
   IGradientOptionsCoords,
 } from "fabric/fabric-impl";
-function figmaPaintsToRktmFills(paints: readonly Paint[]): WithAnnotations<{
+function figmaPaintsToRktmFills(
+  paints: readonly Paint[],
+  supportImage?: boolean
+): WithAnnotations<{
   fills: SerializedFillType[];
 }> {
   const annotations: Annotation[] = [];
@@ -24,6 +25,7 @@ function figmaPaintsToRktmFills(paints: readonly Paint[]): WithAnnotations<{
     ) {
       fills.push(figmaGradientToRpfGradient(paint));
     } else {
+      if (paint.type === "IMAGE" && !!supportImage) return;
       annotations.push({
         type: "error",
         message: `Unsupported paint: ${paint.type}`,
@@ -34,12 +36,12 @@ function figmaPaintsToRktmFills(paints: readonly Paint[]): WithAnnotations<{
   return { data: { fills }, annotations };
 }
 function figmaRGBAToRgbaString(rgba: RGBA): string {
-  return `rgba(${rgba.r},${rgba.g},${rgba.b},${rgba.a || 1})`;
+  return `rgba(${rgba.r * 255},${rgba.g * 255},${rgba.b * 255},${rgba.a || 1})`;
 }
 
 function figmaGradientToRpfGradient(
   fGradient: GradientPaint
-): IGradientOptionsExtended {
+): IGradientOptions & { gradientUnits?: string | undefined } {
   // coords(x1,y1,x2,y2,r1,r2):
   // linear - (0.5, 0, 0.5, 1)
   // radial - (0.5, 0.5, 0.5, 0.5, 0, 1)

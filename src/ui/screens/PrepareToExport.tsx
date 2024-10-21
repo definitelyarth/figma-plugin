@@ -11,10 +11,10 @@ import FrameIcon from "../icons/FrameIcon";
 
 const PrepareToExport = () => {
   const { selection } = useScreenContext();
-
+  console.log({ selection });
   return (
     <div className={"flex flex-col w-full h-full p-2"}>
-      {selection === undefined ? (
+      {!selection ? (
         <div className="flex flex-col gap-3 items-center justify-center self-center h-full">
           <div className={"rounded-lg p-4 bg-lightestGray w-fit"}>
             <Table />
@@ -45,8 +45,9 @@ const PrepareToExport = () => {
             </div>
           </div>
           <Accordion
-            items={Object.keys(selection.annotations).map((k, idx) => {
-              const frame = selection.annotations[k];
+            items={Object.keys(selection.frames).map((k, idx) => {
+              console.log("sss");
+              const frame = selection.frames[k];
               const error = frame.annotations.findIndex(
                 (e) => e.type === "error"
               );
@@ -81,7 +82,7 @@ const PrepareToExport = () => {
                     )}
                   </div>
                 ),
-                title: selection.annotations[k].name,
+                title: selection.frames[k].name,
                 error: error !== -1,
                 warning: warning !== -1,
                 Icon: <FrameIcon />,

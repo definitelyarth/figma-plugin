@@ -6,9 +6,9 @@ import PrepareToExport from "../screens/PrepareToExport";
 import Loader from "../components/Loader";
 import { useIsLoggedIn } from "../state/queries";
 import { emit } from "@create-figma-plugin/utilities";
-import { TransformOutput } from "../../transformers/types";
 import ReadyForExport from "../screens/ReadyForExport";
 import { Variant } from "src/types";
+import { TransformOutput } from "src/transformers_v2/types";
 
 type ScreenContextT = {
   currStep: number;
@@ -18,9 +18,11 @@ type ScreenContextT = {
   prevStep: () => void;
   userId: string | null;
   sessionId: string | null;
-  finalDoc: TransformOutput["doc"] | null;
+  finalDoc: TransformOutput["rpf"] | null;
   preview: undefined | Variant[];
-  setFinalDoc: Dispatch<SetStateAction<TransformOutput["doc"] | null>>;
+  setFinalDoc: Dispatch<SetStateAction<TransformOutput["rpf"] | null>>;
+  lockedSelection: TransformOutput | undefined;
+  setLockedSelection: Dispatch<SetStateAction<TransformOutput | undefined>>;
 };
 
 const screenContext = createContext<ScreenContextT>({
@@ -34,11 +36,16 @@ const screenContext = createContext<ScreenContextT>({
   finalDoc: null,
   setFinalDoc: () => {},
   preview: undefined,
+  lockedSelection: undefined,
+  setLockedSelection: () => {},
 });
 
 const ScreenContextProvider: FC = ({ children }) => {
   const [selection, setSelection] = useState<undefined | TransformOutput>();
-  const [finalDoc, setFinalDoc] = useState<null | TransformOutput["doc"]>(null);
+  const [lockedSelection, setLockedSelection] = useState<
+    undefined | TransformOutput
+  >();
+  const [finalDoc, setFinalDoc] = useState<null | TransformOutput["rpf"]>(null);
   const [preview, setPreview] = useState<Variant[] | undefined>(undefined);
 
   const [userId, setUserId] = useState<null | string>(null);
@@ -101,6 +108,8 @@ const ScreenContextProvider: FC = ({ children }) => {
   return (
     <screenContext.Provider
       value={{
+        lockedSelection,
+        setLockedSelection,
         preview,
         finalDoc,
         setFinalDoc,

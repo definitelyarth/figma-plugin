@@ -1,4 +1,4 @@
-import { ObjectPosition } from "rocketium-types-arth/dist/ObjectContainerTypes";
+import { ObjectPosition } from "rocketium-types/dist/ObjectContainerTypes";
 
 const figmaAlignMentsToObjectPosition = (
   h: "LEFT" | "CENTER" | "RIGHT" | "JUSTIFIED",

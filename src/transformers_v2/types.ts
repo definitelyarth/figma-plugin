@@ -1,7 +1,9 @@
-import { CanvasElementWithOverrides } from "rocketium-types-arth";
+import {
+  CanvasElementWithOverrides,
+  RocketiumPortableFormat,
+} from "rocketium-types";
 
 export type ShapeNode =
-  | RectangleNode
   | EllipseNode
   | LineNode
   | PolygonNode
@@ -16,7 +18,16 @@ export type ClusterVariant = {
   objects: Record<string, CanvasElementWithOverrides>;
 };
 
-export type FigmaBaseNode = TextNode | ShapeNode | FrameNode;
+export type Context = {
+  images: {
+    hash: null | string;
+    nodeIds: string[];
+    isRealHash: boolean;
+    bytes: Uint8Array;
+  }[];
+};
+
+export type FigmaBaseNode = TextNode | ShapeNode | FrameNode | RectangleNode;
 
 export type Variant = {
   id: string;
@@ -44,3 +55,11 @@ export type Size = {
 };
 
 export type SizeObject = CanvasElementWithOverrides;
+export type TransformOutput = {
+  rpf: RocketiumPortableFormat;
+  ctx: Context;
+  frames: Record<
+    string,
+    { annotations: Annotation[]; name: string; id: string }
+  >;
+};

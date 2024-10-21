@@ -1,4 +1,4 @@
-import { Border } from "rocketium-types-arth/dist/ObjectContainerTypes";
+import { Border } from "rocketium-types/dist/ObjectContainerTypes";
 import { Annotation, FigmaBaseNode, WithAnnotations } from "../types";
 import { figmaPaintsToRktmFills } from "./colors";
 

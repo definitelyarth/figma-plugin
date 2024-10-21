@@ -1,12 +1,9 @@
-import {
-  TextContainerJSON,
-  TextStyle,
-  TextStyleRun,
-} from "rocketium-types-arth";
+import { TextContainerJSON, TextStyle, WordStyle } from "rocketium-types";
 import { Annotation, WithAnnotations } from "./types";
 import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
 import { TextStyles } from "src/types";
 import { figmaAlignMentsToObjectPosition } from "./utils/layout";
+import { figmaPaintsToRktmFills } from "./utils/colors";
 
 class FigmaTextNodeToTextContainer {
   constructor(
@@ -50,36 +47,47 @@ class FigmaTextNodeToTextContainer {
       text: this.data.node.characters,
       textAlign: "",
       styles: [],
-      styleRuns: baseStyleAndRuns.finalSegments,
+      wordStyle: baseStyleAndRuns.finalSegments,
     };
-
+    annotations.push(...baseNodeResult.annotations);
+    annotations.forEach((a) => {
+      a.element = { id: this.data.node.id, name: this.data.name };
+    });
     return { data: textContainer, annotations };
   }
 
   figamSegmentsToRktmRuns(node: TextNode) {
-    const response: TextStyleRun[] = [];
+    const response: (WordStyle & { data: { t?: TextStyle } })[] = [];
     node.getStyledTextSegments(TextStyles).forEach((i) => {
+      const rangeData = this.figmaTextNodeRangeToRpfTextAndWordStyle(
+        node,
+        i.start,
+        i.end
+      );
       response.push({
-        type: "",
-        start: i.start,
-        end: i.end,
-        length: i.end - i.start,
-        style: this.figmaTextNodeRangeToRpfTextStyle(node, i.start, i.end),
+        id: new Date().toString(),
+        data: {
+          start: i.start,
+          end: i.end,
+          styles: rangeData.w,
+          t: rangeData.t,
+        },
       });
     });
     return response;
   }
 
-  figmaTextNodeRangeToRpfTextStyle(
+  figmaTextNodeRangeToRpfTextAndWordStyle(
     node: TextNode,
     start: number,
     end: number
-  ): TextStyle {
+  ): { w: WordStyle["data"]["styles"]; t: TextStyle } {
     const fontSize = node.getRangeFontSize(start, end) as number;
     const fontFamily = node.getRangeFontName(start, end) as FontName;
     const fontWeight = node.getRangeFontWeight(start, end) as number;
     const lineHeight = node.getRangeLineHeight(start, end) as LineHeight;
     const fills = node.getRangeFills(start, end) as Paint[];
+    const sFills = figmaPaintsToRktmFills(fills).data.fills;
     const textDecoration = node.getRangeTextDecoration(
       start,
       end
@@ -87,7 +95,7 @@ class FigmaTextNodeToTextContainer {
     const textCase = node.getRangeTextCase(start, end) as TextCase;
     const charSpacing = node.getRangeLetterSpacing(start, end) as LetterSpacing;
 
-    const style: TextStyle = {
+    const textStyle: TextStyle = {
       fontSize,
       fontFamily: fontFamily.family,
       fontWeight,
@@ -97,7 +105,7 @@ class FigmaTextNodeToTextContainer {
           : lineHeight.unit === "PIXELS"
           ? lineHeight.value
           : 0,
-      textFill: fills.length > 0 ? fills[0] : "rgba(0, 0, 0, 0)",
+      textFill: sFills.length > 0 ? sFills[0] : "rgba(0, 0, 0, 0)",
       linethrough: textDecoration === "STRIKETHROUGH",
       underline: textDecoration === "UNDERLINE",
       textCase:
@@ -118,17 +126,29 @@ class FigmaTextNodeToTextContainer {
           : "normal",
     };
 
-    return style;
+    const style: WordStyle["data"]["styles"] = {
+      fontSize,
+      fontFamily: fontFamily.family,
+      fontWeight: String(fontWeight),
+      fill: sFills.length > 0 ? sFills[0] : "rgba(0, 0, 0, 0)",
+      textDecoration,
+      fontStyle:
+        fontFamily.style.split(" ")[1]?.toLowerCase() === "italic"
+          ? "italic"
+          : "normal",
+    };
+
+    return { w: style, t: textStyle };
   }
 
   figmaBaseStyleAndOverrides(node: TextNode) {
     const segments = this.figamSegmentsToRktmRuns(node);
     const hashMap = new Map<string, { count: number; indexes: number[] }>();
-    const finalSegments: TextStyleRun[] = [];
+    const finalSegments: WordStyle[] = [];
     var baseStyle: TextStyle;
 
     segments.forEach((run, idx) => {
-      const hash = JSON.stringify(run.style);
+      const hash = JSON.stringify(run.data.styles);
       if (hashMap.has(hash)) {
         hashMap.get(hash)!.count++;
         hashMap.get(hash)!.indexes.push(idx);
@@ -147,10 +167,13 @@ class FigmaTextNodeToTextContainer {
       }
     });
 
-    baseStyle = segments[maxCountIdx[0]].style as TextStyle;
+    baseStyle = segments[maxCountIdx[0]].data.t!;
 
     segments.forEach((run, idx) => {
-      if (!maxCountIdx.includes(idx)) finalSegments.push(run);
+      if (!maxCountIdx.includes(idx)) {
+        delete run.data.t;
+        finalSegments.push(run);
+      }
     });
 
     return { finalSegments, baseStyle };

@@ -1,18 +1,13 @@
-import { DocumentNode } from "../../schema/compiled";
+import { RocketiumPortableFormat } from "rocketium-types";
 
-const downloadRktm = (rocketiumDocument: DocumentNode) => {
-  const doc = DocumentNode.create(rocketiumDocument);
-  console.log({ doc });
-  const data = DocumentNode.encode(doc).finish();
-  const decoded = DocumentNode.decode(data);
-  console.log({ decoded });
+const downloadRktm = (rocketiumDocument: RocketiumPortableFormat) => {
   const blobURL = window.URL.createObjectURL(
-    new Blob([data], { type: "base64" })
+    new Blob([JSON.stringify(rocketiumDocument)], { type: "application/json" })
   );
   const link = document.createElement("a");
   link.href = blobURL;
-  link.download = `${rocketiumDocument.name}.rktm`;
+  link.download = `${rocketiumDocument.metadata.name}.rktm`;
   link.click();
-  link.setAttribute("download", `${rocketiumDocument.name}.rktm`);
+  link.setAttribute("download", `${rocketiumDocument.metadata.name}.rktm`);
 };
 export { downloadRktm };

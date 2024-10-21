@@ -1,4 +1,4 @@
-import { Annotation, WithAnnotations } from "../types";
+import { WithAnnotations } from "../types";
 
 const BLEND_MODE_MAP: Record<BlendMode, GlobalCompositeOperation | null> = {
   COLOR: "color",

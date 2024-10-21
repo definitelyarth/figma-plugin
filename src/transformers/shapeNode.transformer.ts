@@ -245,8 +245,6 @@ class ImageTransformer extends Transformer<
       bytes = await figmaImage.getBytesAsync();
     } catch (e) {
       bytes = await this.node.node.exportAsync({ format: "PNG" });
-      console.error(e);
-      console.log({ id, name: this.node.node.name });
     }
     const image = {
       figmaFrameId: this.executionContext.figmaFrameId,

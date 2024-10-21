@@ -1,7 +1,4 @@
-import {
-  CanvasElementJSON,
-  CanvasElementWithOverrides,
-} from "rocketium-types-arth";
+import { CanvasElementJSON, CanvasElementWithOverrides } from "rocketium-types";
 import { ClusterVariant } from "src/transformers_v2/types";
 
 const areVariantsSame = (a: ClusterVariant, b: ClusterVariant) => {

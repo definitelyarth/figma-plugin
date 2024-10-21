@@ -1,5 +1,5 @@
-import { RoundedRectJSON } from "rocketium-types-arth";
-import { WithAnnotations } from "./types";
+import { RoundedRectJSON } from "rocketium-types";
+import { Annotation, WithAnnotations } from "./types";
 import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
 
 class FigmaRectangleToRoundedRect {
@@ -13,11 +13,13 @@ class FigmaRectangleToRoundedRect {
   ) {}
 
   transform(): WithAnnotations<RoundedRectJSON> {
+    const annotations: Annotation[] = [];
     const baseNodeResult = FigmaBaseNodeToRpfBaseElement({
       xOffset: this.data.xOffset,
       yOffset: this.data.yOffset,
       node: this.data.node,
       displayText: this.data.name,
+      supportImage: true,
     });
     const hash = `rounded-rect:${this.data.node.fillGeometry
       .map((d) => d.data)
@@ -29,7 +31,11 @@ class FigmaRectangleToRoundedRect {
       type: "rounded-rect",
       dataType: "SHAPE",
     };
-    return { data: roundedRect, annotations: baseNodeResult.annotations };
+    annotations.push(...baseNodeResult.annotations);
+    annotations.forEach((a) => {
+      a.element = { id: this.data.node.id, name: this.data.name };
+    });
+    return { data: roundedRect, annotations };
   }
 }
 

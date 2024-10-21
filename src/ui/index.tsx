@@ -4,12 +4,10 @@ import Header from "./components/Header";
 import ExternalIcon from "./icons/ExternalIcon";
 import { Button } from "./components/Button";
 import { useMutatePopulateImages } from "./state/mutation";
-import { TransformOutput } from "src/transformers/types";
-import { downloadRktm } from "./utils/download";
+import { TransformOutput } from "src/transformers_v2/types";
 import Loader from "./components/Loader";
 import { emit } from "@create-figma-plugin/utilities";
-import { Message } from "protobufjs";
-import { DocumentNode } from "src/schema/compiled";
+import { downloadRktm } from "./utils/download";
 
 const MainUI = () => {
   const { CurrScreen, selection, currStep, finalDoc, nextStep } =
@@ -38,17 +36,22 @@ const MainUI = () => {
           <Loader />
         ) : (
           <Button
-            disabled={selection === undefined || isLoading || isError}
+            disabled={
+              (selection === undefined && finalDoc === undefined) ||
+              isLoading ||
+              isError
+            }
             onClick={async () => {
               if (currStep === 0) {
+                const lockedSelection = { ...selection };
                 const doc = await mutateAsync({
-                  data: selection as TransformOutput,
+                  data: lockedSelection as TransformOutput,
                 });
-                if (doc) emit("preview-export", doc);
+                if (doc) emit("preview-export", lockedSelection);
                 nextStep();
               } else if (currStep === 1) {
                 if (finalDoc) {
-                  downloadRktm(finalDoc as DocumentNode);
+                  downloadRktm(finalDoc);
                 }
               }
             }}

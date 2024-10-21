@@ -1,7 +1,7 @@
 import { useMutation } from "react-query";
 import CryptoJS from "crypto-js";
 import { emit } from "@create-figma-plugin/utilities";
-import { TransformOutput } from "src/transformers/types";
+import { TransformOutput } from "src/transformers_v2/types";
 import { useScreenContext } from "../contexts/ScreenContext";
 import { uploadFileToS3 } from "src/storage/s3";
 
@@ -10,26 +10,25 @@ const useMutatePopulateImages = () => {
   return useMutation({
     mutationFn: async ({ data }: { data: TransformOutput }) => {
       if (!userId || !sessionId) return;
-      for await (const hash of Object.keys(data.imageMap)) {
-        const obj = data.imageMap[hash];
-        obj.state == "IN_PROGRESS";
+      const uploadImagesPromise = data.ctx.images.map(async (obj) => {
         const key = await uploadFileToS3({
           userId,
           sessionId,
           imageBytes: obj.bytes,
         });
-        obj.uploadedUrl = key;
-        for (const image of obj.images) {
-          const position = data.frameIdToLocation[image.figmaFrameId];
-
-          const imageNode =
-            data.doc.children![position.canvasIdx].children![position.frameIdx]
-              .children![image.idx];
-          if (imageNode.type === "IMAGE") imageNode.url = obj.uploadedUrl;
-        }
-      }
-      setFinalDoc(data.doc);
-      return data.doc;
+        return { hash: obj.hash, uploadedUrl: key };
+      });
+      const storage = await Promise.all(uploadImagesPromise);
+      storage.forEach(({ hash, uploadedUrl }) => {
+        if (!hash) return;
+        data.rpf.variants.forEach((variant) => {
+          const object = variant.variant.objects[hash];
+          if (object.type === "image-container" && object.dataType === "IMAGE")
+            object.src = uploadedUrl;
+        });
+      });
+      setFinalDoc(data.rpf);
+      return data.rpf;
     },
   });
 };

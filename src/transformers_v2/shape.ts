@@ -1,5 +1,5 @@
-import { PathJSON, RoundedRectJSON } from "rocketium-types-arth";
-import { ShapeNode, WithAnnotations } from "./types";
+import { PathJSON, RoundedRectJSON } from "rocketium-types";
+import { Annotation, ShapeNode, WithAnnotations } from "./types";
 import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
 
 class FigmaShapeToPath {
@@ -13,6 +13,7 @@ class FigmaShapeToPath {
   ) {}
 
   transform(): WithAnnotations<PathJSON> {
+    const annotations: Annotation[] = [];
     const baseNodeResult = FigmaBaseNodeToRpfBaseElement({
       xOffset: this.data.xOffset,
       yOffset: this.data.yOffset,
@@ -36,7 +37,11 @@ class FigmaShapeToPath {
       dataType: "SHAPE",
       path: _2dPaths,
     };
-    return { data: path, annotations: baseNodeResult.annotations };
+    annotations.push(...baseNodeResult.annotations);
+    annotations.forEach((a) => {
+      a.element = { id: this.data.node.id, name: this.data.name };
+    });
+    return { data: path, annotations };
   }
 
   parsePathData(path: string): (string | number)[][] {

@@ -1,8 +1,9 @@
 import { on, showUI } from "@create-figma-plugin/utilities";
 import { transformCanvas } from "./transformers";
-import { CanvasNode } from "./types/rpf";
 import { Size, Variant } from "./types";
 import exportToRPF from "./transformers_v2";
+import { RocketiumPortableFormat } from "rocketium-types";
+import { TransformOutput } from "./transformers_v2/types";
 
 export default function () {
   showUI({
@@ -15,7 +16,10 @@ export default function () {
       figma.currentPage.selection.findIndex((e) => e.type === "FRAME") != -1
     ) {
       try {
-        const output = await transformCanvas(figma.currentPage);
+        const output = await exportToRPF(
+          figma.currentPage.name,
+          figma.currentPage.selection
+        );
         figma.ui.postMessage({ event: "selection", data: output });
       } catch (e) {
         console.error(e);
@@ -30,24 +34,29 @@ export default function () {
     if (
       figma.currentPage.selection.findIndex((e) => e.type === "FRAME") != -1
     ) {
-      const output = await transformCanvas(figma.currentPage);
+      const output = await exportToRPF(
+        figma.currentPage.name,
+        figma.currentPage.selection
+      );
       figma.ui.postMessage({ event: "selection", data: output });
     } else {
       figma.ui.postMessage({ event: "selection", data: undefined });
     }
   });
 
-  on("preview-export", async (doc: DocumentNode) => {
+  on("preview-export", async (doc: TransformOutput | undefined) => {
+    if (!doc) {
+      figma.ui.postMessage({ event: "preview-export", data: [] });
+      return;
+    }
     const variants: Variant[] = [];
-    for await (const canvas of doc.children!) {
+    for await (const [key, frame] of Object.entries(doc.frames)) {
       const sizes: Size[] = [];
-      const variant: Variant = { name: canvas.name, sizes };
-      for await (const frame of canvas.children!) {
-        const node = await figma.getNodeByIdAsync(frame.id);
-        if (!node || node.type !== "FRAME") continue;
-        const data = await node.exportAsync({ format: "PNG" });
-        sizes.push({ name: frame.name, imageData: data });
-      }
+      const variant: Variant = { name: frame.name, sizes };
+      const node = await figma.getNodeByIdAsync(frame.id);
+      if (!node || node.type !== "FRAME") continue;
+      const data = await node.exportAsync({ format: "PNG" });
+      sizes.push({ name: frame.name, imageData: data });
       variants.push(variant);
     }
     figma.ui.postMessage({ event: "preview-export", data: variants });
@@ -77,7 +86,7 @@ export default function () {
 
   on("printSelected", () => {
     exportToRPF("SomeName", figma.currentPage.selection);
-    // .forEach((e) => {
+    // figma.currentPage.selection.forEach((e) => {
     //   const printObj: Record<string, unknown> = { name: e.name, node: e };
     //   console.log(printObj);
     // });
