@@ -4,7 +4,7 @@ import Header from "./components/Header";
 import ExternalIcon from "./icons/ExternalIcon";
 import { Button } from "./components/Button";
 import { useMutatePopulateImages } from "./state/mutation";
-import { TransformOutput } from "src/transformers_v2/types";
+import { TransformOutput } from "src/transformers/types";
 import Loader from "./components/Loader";
 import { emit } from "@create-figma-plugin/utilities";
 import { downloadRktm } from "./utils/download";

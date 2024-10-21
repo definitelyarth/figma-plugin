@@ -1,9 +1,7 @@
 import { on, showUI } from "@create-figma-plugin/utilities";
-import { transformCanvas } from "./transformers";
 import { Size, Variant } from "./types";
-import exportToRPF from "./transformers_v2";
-import { RocketiumPortableFormat } from "rocketium-types";
-import { TransformOutput } from "./transformers_v2/types";
+import exportToRPF from "./transformers";
+import { TransformOutput } from "./transformers/types";
 
 export default function () {
   showUI({

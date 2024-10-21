@@ -1,12 +1,40 @@
-import { DocumentNode, FrameChildNode } from "../types/rpf";
+import {
+  CanvasElementWithOverrides,
+  RocketiumPortableFormat,
+} from "rocketium-types";
 
-export type RktmNodeType = "TEXT" | "SHAPE" | "IMAGE";
+export type ShapeNode =
+  | EllipseNode
+  | LineNode
+  | PolygonNode
+  | StarNode
+  | VectorNode;
 
-export type IdStore = {
-  [key in RktmNodeType]: { map: Map<string, string>; lastId: number };
+export type ClusterVariant = {
+  width: number;
+  height: number;
+  id: string;
+  displayName: string;
+  objects: Record<string, CanvasElementWithOverrides>;
 };
 
-export type WithAnnotations<T> = { annotations: Annotation[]; data: T };
+export type Context = {
+  images: {
+    hash: null | string;
+    nodeIds: string[];
+    isRealHash: boolean;
+    bytes: Uint8Array;
+  }[];
+};
+
+export type FigmaBaseNode = TextNode | ShapeNode | FrameNode | RectangleNode;
+
+export type Variant = {
+  id: string;
+  sizes: Size[];
+};
+
+export type WithAnnotations<T> = { data: T; annotations: Annotation[] };
 
 export type AnnotationType = "info" | "error";
 
@@ -19,49 +47,19 @@ export type Annotation = {
   };
 };
 
-export type ImageState = "PENDING" | "IN_PROGRESS" | "ERROR" | "COMPLETED";
-
-export type ImageMap = Record<
-  string,
-  {
-    state: ImageState;
-    uploadedUrl?: string;
-    images: {
-      figmaFrameId: string;
-      idx: number;
-    }[];
-    name: string;
-    bytes: Uint8Array;
-    isExport?: boolean;
-  }
->;
-
-export type ExecutionContext = {
-  figmaFrameId: string;
-  IdStore: IdStore;
-  frameChildNodes: FrameChildNode[];
-  annotations: Annotation[];
-  generateIdForChildNode({
-    type,
-    hash,
-  }: {
-    type: RktmNodeType;
-    hash: string;
-  }): string;
-  z: number;
-  imageMap: ImageMap;
-  frameIdx: number;
+export type Size = {
+  id: string;
+  width: number;
+  height: number;
+  objects: SizeObject[];
 };
 
+export type SizeObject = CanvasElementWithOverrides;
 export type TransformOutput = {
-  doc: DocumentNode;
-  annotations: Record<
+  rpf: RocketiumPortableFormat;
+  ctx: Context;
+  frames: Record<
     string,
-    {
-      annotations: Annotation[];
-      name: string;
-    }
+    { annotations: Annotation[]; name: string; id: string }
   >;
-  imageMap: ImageMap;
-  frameIdToLocation: Record<string, { canvasIdx: number; frameIdx: number }>;
 };

@@ -1,7 +1,7 @@
 import { useMutation } from "react-query";
 import CryptoJS from "crypto-js";
 import { emit } from "@create-figma-plugin/utilities";
-import { TransformOutput } from "src/transformers_v2/types";
+import { TransformOutput } from "src/transformers/types";
 import { useScreenContext } from "../contexts/ScreenContext";
 import { uploadFileToS3 } from "src/storage/s3";
 

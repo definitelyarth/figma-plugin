@@ -8,7 +8,7 @@ import { useIsLoggedIn } from "../state/queries";
 import { emit } from "@create-figma-plugin/utilities";
 import ReadyForExport from "../screens/ReadyForExport";
 import { Variant } from "src/types";
-import { TransformOutput } from "src/transformers_v2/types";
+import { TransformOutput } from "src/transformers/types";
 
 type ScreenContextT = {
   currStep: number;
