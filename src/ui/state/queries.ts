@@ -10,7 +10,6 @@ const useIsLoggedIn = ({
   useQuery<boolean, unknown, boolean, ["user"]>({
     queryKey: ["user"],
     queryFn: async () => {
-      console.log({ userId, sessionId });
       if (!userId || !sessionId) {
         return false;
       }
@@ -27,7 +26,8 @@ const useIsLoggedIn = ({
         }
       );
       const data = await response.json();
-      return data.message === "successful";
+      const success = data.message === "successful";
+      return success;
     },
   });
 

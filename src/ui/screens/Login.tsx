@@ -51,9 +51,19 @@ const Login = () => {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="password" className={"text-xs"}>
-              Password
-            </label>
+            <div className={"flex justify-between w-full items-center"}>
+              <label htmlFor="password" className={"text-xs"}>
+                Password
+              </label>
+              <a
+                href="https://rocketium.com/forgot_password"
+                target={"_blank"}
+                className={"text-brand700 font-normal"}
+                style={{ fontSize: 11 }}
+              >
+                Forgot password?
+              </a>
+            </div>
             <TextInput
               disabled={isLoading}
               id={"password"}

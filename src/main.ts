@@ -2,6 +2,7 @@ import { on, showUI } from "@create-figma-plugin/utilities";
 import { Size, Variant } from "./types";
 import exportToRPF from "./transformers";
 import { TransformOutput } from "./transformers/types";
+import { RocketiumPortableFormat } from "rocketium-types";
 
 export default function () {
   showUI({
@@ -42,21 +43,31 @@ export default function () {
     }
   });
 
-  on("preview-export", async (doc: TransformOutput | undefined) => {
+  on("preview-export", async (doc: RocketiumPortableFormat | undefined) => {
     if (!doc) {
       figma.ui.postMessage({ event: "preview-export", data: [] });
       return;
     }
     const variants: Variant[] = [];
-    for await (const [key, frame] of Object.entries(doc.frames)) {
-      const sizes: Size[] = [];
-      const variant: Variant = { name: frame.name, sizes };
-      const node = await figma.getNodeByIdAsync(frame.id);
-      if (!node || node.type !== "FRAME") continue;
-      const data = await node.exportAsync({ format: "PNG" });
-      sizes.push({ name: frame.name, imageData: data });
-      variants.push(variant);
+    for await (const variant of doc.variants) {
+      const variantForPreview: Variant = {
+        name: "Variant",
+        sizes: [],
+      };
+      for await (const [frameId, size] of Object.entries(
+        variant.variant.sizes
+      )) {
+        const node = await figma.getNodeByIdAsync(frameId);
+        if (!node || node.type !== "FRAME") continue;
+        const data = await node.exportAsync({ format: "PNG" });
+        variantForPreview.sizes.push({
+          name: size.displayName,
+          imageData: data,
+        });
+      }
+      variants.push(variantForPreview);
     }
+
     figma.ui.postMessage({ event: "preview-export", data: variants });
   });
 

@@ -7,10 +7,11 @@ import { uploadFileToS3 } from "src/storage/s3";
 import { generateObjectId } from "src/utils/ID";
 
 const useMutatePopulateImages = () => {
-  const { userId, sessionId, setFinalDoc } = useScreenContext();
+  const { userId, sessionId, setFinalDoc, setIsError } = useScreenContext();
   return useMutation({
     mutationFn: async ({ data }: { data: TransformOutput }) => {
       if (!userId || !sessionId) return;
+
       const uploadImagesPromise = data.ctx.images.map(async (obj) => {
         const key = await uploadFileToS3({
           userId,
@@ -24,6 +25,7 @@ const useMutatePopulateImages = () => {
         if (!hash) return;
         data.rpf.variants.forEach((variant) => {
           const object = variant.variant.objects[hash];
+          if (!object) return;
           if (object.type === "image-container" && object.dataType === "IMAGE")
             object.src = uploadedUrl;
         });
@@ -57,19 +59,28 @@ const useMutatePopulateImages = () => {
       setFinalDoc(finalDoc);
       return forPreview;
     },
+    onError: (e) => {
+      setIsError(true);
+    },
   });
 };
 
-const useMutateLogout = () =>
-  useMutation({
+const useMutateLogout = () => {
+  const { setIsError } = useScreenContext();
+  return useMutation({
     mutationFn: async () => {
       emit("set-value", { key: "userId", value: null });
       emit("set-value", { key: "sessionId", value: null });
     },
+    onError: (e) => {
+      setIsError(true);
+    },
   });
+};
 
-const useMutateLogin = () =>
-  useMutation({
+const useMutateLogin = () => {
+  const { setIsError } = useScreenContext();
+  return useMutation({
     mutationFn: async ({
       email,
       password,
@@ -109,7 +120,6 @@ const useMutateLogin = () =>
         user: { _id: string };
         sessionId: string;
       };
-      console.log({ json });
 
       if (json.message !== "successful") {
         throw new Error("Unsuccesful signup");
@@ -120,6 +130,10 @@ const useMutateLogin = () =>
 
       return json;
     },
+    onError: (e) => {
+      setIsError(true);
+    },
   });
+};
 
 export { useMutateLogin, useMutateLogout, useMutatePopulateImages };

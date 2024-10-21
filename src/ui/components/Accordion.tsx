@@ -28,13 +28,13 @@ const AccordionItem: FC<AccordionItemProps> = ({
   return (
     <div className="">
       <div
-        className="w-full text-left py-2 focus:outline-none cursor-pointer"
+        className="w-full text-left py-2 focus:outline-none"
         onClick={toggleOpen}
       >
         <div className="flex justify-between items-center text-xs">
-          <div className="flex gap-2 items-center font-semibold text-black">
+          <div className="flex gap-2 items-center font-medium text-black">
             {Icon}
-            <span>{title}</span>
+            <span className={"text-neutral-900"}>{title}</span>
           </div>
           <div className={"flex gap-2"}>
             <div className={"flex gap-2 items-center"}>
@@ -51,7 +51,7 @@ const AccordionItem: FC<AccordionItemProps> = ({
                 </div>
               )}
             </div>
-            <span className={"cursor-pointer"}>
+            <span className={"cursor-pointer pr-4"}>
               {isOpen ? (
                 <IconChevronUp16 className={"text-brand"} />
               ) : (
@@ -61,7 +61,7 @@ const AccordionItem: FC<AccordionItemProps> = ({
           </div>
         </div>
       </div>
-      {isOpen && <div className="py-2">{content}</div>}
+      {isOpen && <div className="py-2 font-normal">{content}</div>}
     </div>
   );
 };

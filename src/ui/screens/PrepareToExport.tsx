@@ -11,9 +11,8 @@ import FrameIcon from "../icons/FrameIcon";
 
 const PrepareToExport = () => {
   const { selection } = useScreenContext();
-  console.log({ selection });
   return (
-    <div className={"flex flex-col w-full h-full p-2"}>
+    <div className={"flex flex-col w-full h-full p-2 overflow-scroll"}>
       {!selection ? (
         <div className="flex flex-col gap-3 items-center justify-center self-center h-full">
           <div className={"rounded-lg p-4 bg-lightestGray w-fit"}>
@@ -32,11 +31,11 @@ const PrepareToExport = () => {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2 h-full text-neutral-900 w-full">
-          <div className="flex justify-between py-1 px-2 w-full">
-            <span className={"text-xs"}>Selected elements</span>
+        <div className="flex flex-col gap-2 h-full text-neutral-900 w-full font-medium">
+          <div className="flex justify-between py-1 px-2 w-full pr-6 items-center">
+            <span className={"text-xs "}>Selected elements</span>
             <div
-              className="flex items-center gap-2 text-brand fill-brand cursor-pointer"
+              className="flex items-center gap-2 text-brand700 fill-brand700 cursor-pointer"
               onClick={() => {
                 emit("selection-clear");
               }}
@@ -46,7 +45,6 @@ const PrepareToExport = () => {
           </div>
           <Accordion
             items={Object.keys(selection.frames).map((k, idx) => {
-              console.log("sss");
               const frame = selection.frames[k];
               const error = frame.annotations.findIndex(
                 (e) => e.type === "error"

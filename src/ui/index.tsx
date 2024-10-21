@@ -8,22 +8,37 @@ import { TransformOutput } from "src/transformers/types";
 import Loader from "./components/Loader";
 import { emit } from "@create-figma-plugin/utilities";
 import { downloadRktm } from "./utils/download";
+import AlertOctagon from "./icons/AlertOctagon";
 
 const MainUI = () => {
-  const { CurrScreen, selection, currStep, finalDoc, nextStep } =
+  const { CurrScreen, selection, currStep, finalDoc, nextStep, isError } =
     useScreenContext();
-  const { mutateAsync, isLoading, isError } = useMutatePopulateImages();
+  const { mutateAsync, isLoading } = useMutatePopulateImages();
 
   return (
     <div
       class={
-        "flex flex-col w-full min-h-full overflow-scroll items-center justify-center relative bg-white h-screen"
+        "flex flex-col w-full min-h-full items-center justify-center relative bg-white h-full"
       }
     >
       <Header />
       <CurrScreen />
+      {isError && (
+        <div
+          className={"flex gap-2 items-center bg-lightError50 py-2 px-4 w-full"}
+        >
+          <div className={"bg-lightError100 p-2 rounded-md"}>
+            <AlertOctagon className={"stroke-lightError700"} />
+          </div>
+          <span className={"text-black"}>
+            The process failed. Please try again
+          </span>
+        </div>
+      )}
       <div
-        className={"flex justify-between border-t w-screen p-4 items-center"}
+        className={
+          "flex justify-between border-t w-screen p-2 px-3 items-center stick bottom-0 z-10"
+        }
       >
         <a
           href=""
@@ -47,7 +62,7 @@ const MainUI = () => {
                 const doc = await mutateAsync({
                   data: lockedSelection as TransformOutput,
                 });
-                if (doc) emit("preview-export", lockedSelection);
+                if (doc) emit("preview-export", doc);
                 nextStep();
               } else if (currStep === 1) {
                 if (finalDoc) {
@@ -55,6 +70,7 @@ const MainUI = () => {
                 }
               }
             }}
+            className={"p-1"}
           >
             {currStep == 0 ? "Prepare for Export" : "Export"}
           </Button>

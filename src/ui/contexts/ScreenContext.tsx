@@ -23,6 +23,8 @@ type ScreenContextT = {
   setFinalDoc: Dispatch<SetStateAction<TransformOutput["rpf"] | null>>;
   lockedSelection: TransformOutput | undefined;
   setLockedSelection: Dispatch<SetStateAction<TransformOutput | undefined>>;
+  isError: boolean;
+  setIsError: Dispatch<SetStateAction<boolean>>;
 };
 
 const screenContext = createContext<ScreenContextT>({
@@ -38,9 +40,13 @@ const screenContext = createContext<ScreenContextT>({
   preview: undefined,
   lockedSelection: undefined,
   setLockedSelection: () => {},
+  isError: false,
+  setIsError: () => {},
 });
 
 const ScreenContextProvider: FC = ({ children }) => {
+  const [isError, setIsError] = useState(false);
+
   const [selection, setSelection] = useState<undefined | TransformOutput>();
   const [lockedSelection, setLockedSelection] = useState<
     undefined | TransformOutput
@@ -59,7 +65,6 @@ const ScreenContextProvider: FC = ({ children }) => {
         event: string;
         data: unknown;
       };
-      console.log(event);
       if (event.event === "get-value") {
         const { key, value } = event.data as {
           key: "userId" | "sessionId";
@@ -81,7 +86,7 @@ const ScreenContextProvider: FC = ({ children }) => {
     emit("get-value", { key: "sessionId" });
   }, []);
 
-  const { data, isLoading, isError, refetch } = useIsLoggedIn({
+  const { data, isLoading, refetch } = useIsLoggedIn({
     userId,
     sessionId,
   });
@@ -89,10 +94,6 @@ const ScreenContextProvider: FC = ({ children }) => {
   useEffect(() => {
     refetch();
   }, [userId, sessionId]);
-
-  if (isError) {
-    return <h1>error</h1>;
-  }
 
   if (isLoading) {
     return <Loader />;
@@ -108,6 +109,8 @@ const ScreenContextProvider: FC = ({ children }) => {
   return (
     <screenContext.Provider
       value={{
+        isError,
+        setIsError,
         lockedSelection,
         setLockedSelection,
         preview,

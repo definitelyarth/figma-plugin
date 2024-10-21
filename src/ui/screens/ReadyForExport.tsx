@@ -5,7 +5,6 @@ import CirclesIcon from "../icons/CirclesIcon";
 
 const ReadyForExport = () => {
   const { preview } = useScreenContext();
-  console.log({ preview });
 
   if (preview === undefined) {
     return (
@@ -20,8 +19,8 @@ const ReadyForExport = () => {
   }
 
   return (
-    <div className={"flex flex-col w-full h-full p-2"}>
-      <div className={"px-2 py-1 text-sm"}>Ready For Export</div>
+    <div className={"flex flex-col w-full h-full p-2 overflow-scroll"}>
+      <div className={"px-2 py-1 text-xs text-black"}>Ready For Export</div>
       <Accordion
         items={preview.map((variant, idx) => {
           return {
@@ -33,7 +32,7 @@ const ReadyForExport = () => {
                   );
                   return (
                     <div
-                      className={`flex items-center py-2 gap-6`}
+                      className={`flex items-center py-2 gap-6 text-black`}
                       style={{ borderTopWidth: `${idx !== 0 ? 1 : 0}` }}
                     >
                       <div
