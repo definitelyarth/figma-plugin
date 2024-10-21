@@ -4,6 +4,7 @@ import { FigmaShapeToPath } from "./shape";
 import FigmaRectangleToRoundedRect from "./rectangle";
 import { FigmaTextNodeToTextContainer } from "./text";
 import FigmaImageToImageContainer from "./image";
+import FigmaFrameToCreativeBox from "./creative_box";
 
 class FigmaFrameToRktmSize {
   annotations: Annotation[];
@@ -13,7 +14,7 @@ class FigmaFrameToRktmSize {
   constructor(private node: FrameNode, private ctx: Context) {
     this.annotations = [];
     this.objects = {};
-    this.z = 0;
+    this.z = 1;
   }
 
   async recurse({
@@ -195,6 +196,13 @@ class FigmaFrameToRktmSize {
     displayName: string;
     objects: Record<string, CanvasElementWithOverrides>;
   }> {
+    const creativeBox = new FigmaFrameToCreativeBox({ node: this.node });
+    const converted = creativeBox.transform();
+    this.objects[converted.data.id] = {
+      ...converted.data,
+      zIndex: 0,
+      overrides: {},
+    };
     await this.recurse({
       node: this.node,
       xOffset: 0,

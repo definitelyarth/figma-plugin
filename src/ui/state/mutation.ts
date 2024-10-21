@@ -4,6 +4,7 @@ import { emit } from "@create-figma-plugin/utilities";
 import { TransformOutput } from "src/transformers/types";
 import { useScreenContext } from "../contexts/ScreenContext";
 import { uploadFileToS3 } from "src/storage/s3";
+import { generateObjectId } from "src/utils/ID";
 
 const useMutatePopulateImages = () => {
   const { userId, sessionId, setFinalDoc } = useScreenContext();
@@ -27,8 +28,34 @@ const useMutatePopulateImages = () => {
             object.src = uploadedUrl;
         });
       });
-      setFinalDoc(data.rpf);
-      return data.rpf;
+      const forPreview = data.rpf;
+      const finalDoc = window.structuredClone(data.rpf);
+      const objectKeysMap: Record<string, string> = {};
+      finalDoc.variants.forEach((variant) => {
+        for (const key of Object.keys(variant.variant.sizes)) {
+          const size = variant.variant.sizes[key];
+          objectKeysMap[size.id] = generateObjectId();
+          variant.variant.sizes[objectKeysMap[size.id]] = {
+            ...size,
+            id: objectKeysMap[size.id],
+          };
+          delete variant.variant.sizes[key];
+        }
+
+        for (const key of Object.keys(variant.variant.objects)) {
+          const object = variant.variant.objects[key];
+          for (const oKey of Object.keys(object.overrides)) {
+            const newKey = objectKeysMap[oKey];
+            object.overrides[newKey] = object.overrides[oKey];
+            delete object.overrides[oKey];
+          }
+          const newObjKey = generateObjectId();
+          variant.variant.objects[newObjKey] = { ...object, id: newObjKey };
+          delete variant.variant.objects[key];
+        }
+      });
+      setFinalDoc(finalDoc);
+      return forPreview;
     },
   });
 };
