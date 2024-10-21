@@ -1,7 +1,7 @@
 import { RocketiumPortableFormat } from "rocketium-types";
 import FigmaFrameToRktmSize from "./frame";
 import { ClusterVariant, Context, TransformOutput } from "./types";
-import { clustersToCanvases, clusterVariants } from "src/clusters_v2";
+import { clustersToCanvases, clusterVariants } from "src/clustering";
 
 const exportToRPF = async (
   name: string,

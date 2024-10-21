@@ -84,9 +84,5 @@ export default function () {
 
   on("printSelected", () => {
     exportToRPF("SomeName", figma.currentPage.selection);
-    // figma.currentPage.selection.forEach((e) => {
-    //   const printObj: Record<string, unknown> = { name: e.name, node: e };
-    //   console.log(printObj);
-    // });
   });
 }
