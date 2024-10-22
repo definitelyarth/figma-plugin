@@ -1,6 +1,35 @@
 import { Border } from "rocketium-types/dist/ObjectContainerTypes";
 import { Annotation, FigmaBaseNode, WithAnnotations } from "../types";
-import { figmaPaintsToRktmFills } from "./colors";
+import { figmaPaintsToRktmFills, figmaRGBAToRgbaString } from "./colors";
+import { SerializedFabricShadow } from "rocketium-types/dist/SerializedFabricTypes";
+
+const FigmaEffectsToRpfEffects = (
+  effects: readonly Effect[]
+): WithAnnotations<SerializedFabricShadow | null> => {
+  const rpfEffects: SerializedFabricShadow[] = [];
+  const annotations: Annotation[] = [];
+  effects.forEach((effect) => {
+    if (effect.type !== "DROP_SHADOW") {
+      annotations.push({
+        message: `Unsupported effect: ${effect.type}`,
+        type: "error",
+      });
+    } else {
+      rpfEffects.push({
+        blur: effect.radius,
+        offsetX: effect.offset.x,
+        offsetY: effect.offset.y,
+        color: figmaRGBAToRgbaString(effect.color),
+      });
+    }
+  });
+  if (rpfEffects.length > 1)
+    annotations.push({
+      message: "Only one effect supported per element.",
+      type: "error",
+    });
+  return { annotations, data: rpfEffects[0] || null };
+};
 
 const FigmaBaseNodeToBorder = (
   node: FigmaBaseNode
@@ -38,4 +67,4 @@ const FigmaBaseNodeToBorder = (
   return { data: { border }, annotations };
 };
 
-export { FigmaBaseNodeToBorder };
+export { FigmaBaseNodeToBorder, FigmaEffectsToRpfEffects };

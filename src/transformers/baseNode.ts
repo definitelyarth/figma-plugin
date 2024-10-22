@@ -1,6 +1,9 @@
 import { BaseElementJSON } from "rocketium-types";
 import { Annotation, FigmaBaseNode, WithAnnotations } from "./types";
-import { FigmaBaseNodeToBorder } from "./utils/styles";
+import {
+  FigmaBaseNodeToBorder,
+  FigmaEffectsToRpfEffects,
+} from "./utils/styles";
 import { figmaPaintsToRktmFills } from "./utils/colors";
 import { FigmaBlendModeToRpfGlobalCompositeOperation } from "./utils/layer";
 import { SerializedFillType } from "rocketium-types/dist/ColorTypes";
@@ -22,6 +25,7 @@ const FigmaBaseNodeToRpfBaseElement = ({
 }> => {
   const annotations: Annotation[] = [];
   const border = FigmaBaseNodeToBorder(node);
+  const shadow = FigmaEffectsToRpfEffects(node.effects);
   let fills: {
     data: { fills: SerializedFillType[] };
     annotations: Annotation[];
@@ -34,7 +38,8 @@ const FigmaBaseNodeToRpfBaseElement = ({
   annotations.push(
     ...border.annotations,
     ...fills.annotations,
-    ...globalCompositeOperation.annotations
+    ...globalCompositeOperation.annotations,
+    ...shadow.annotations
   );
   const baseElement: Omit<BaseElementJSON, "id" | "dataType" | "type"> = {
     displayText,
@@ -60,7 +65,7 @@ const FigmaBaseNodeToRpfBaseElement = ({
       globalCompositeOperation.data.globalCompositeOperation,
     padding: {},
     selectable: true,
-    shadow: {},
+    shadow: shadow.data,
   };
   return { data: { baseElement }, annotations };
 };
