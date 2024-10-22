@@ -11,9 +11,17 @@ import { downloadRktm } from "./utils/download";
 import AlertOctagon from "./icons/AlertOctagon";
 
 const MainUI = () => {
-  const { CurrScreen, selection, currStep, finalDoc, nextStep, isError } =
-    useScreenContext();
-  const { mutateAsync, isLoading } = useMutatePopulateImages();
+  const {
+    CurrScreen,
+    selection,
+    currStep,
+    finalDoc,
+    nextStep,
+    isError,
+    isLoading,
+  } = useScreenContext();
+  const { mutateAsync, isLoading: isPopulateLoading } =
+    useMutatePopulateImages();
 
   return (
     <div
@@ -22,7 +30,17 @@ const MainUI = () => {
       }
     >
       <Header />
-      <CurrScreen />
+      {isLoading ? (
+        <div
+          className={
+            "flex flex-col w-full h-full p-2 text-black animate-pulse items-center justify-center"
+          }
+        >
+          Loading...
+        </div>
+      ) : (
+        <CurrScreen />
+      )}
       {isError && (
         <div
           className={"flex gap-2 items-center bg-lightError50 py-2 px-4 w-full"}
@@ -47,14 +65,15 @@ const MainUI = () => {
           <ExternalIcon />
           Guidelines for export Rktm
         </a>
-        {isLoading ? (
+        {isPopulateLoading ? (
           <Loader />
         ) : (
           <Button
             disabled={
               (selection === undefined && finalDoc === undefined) ||
               isLoading ||
-              isError
+              isError ||
+              isPopulateLoading
             }
             onClick={async () => {
               if (currStep === 0) {

@@ -25,6 +25,7 @@ type ScreenContextT = {
   setLockedSelection: Dispatch<SetStateAction<TransformOutput | undefined>>;
   isError: boolean;
   setIsError: Dispatch<SetStateAction<boolean>>;
+  isLoading: boolean;
 };
 
 const screenContext = createContext<ScreenContextT>({
@@ -42,11 +43,12 @@ const screenContext = createContext<ScreenContextT>({
   setLockedSelection: () => {},
   isError: false,
   setIsError: () => {},
+  isLoading: false,
 });
 
 const ScreenContextProvider: FC = ({ children }) => {
   const [isError, setIsError] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [selection, setSelection] = useState<undefined | TransformOutput>();
   const [lockedSelection, setLockedSelection] = useState<
     undefined | TransformOutput
@@ -65,6 +67,7 @@ const ScreenContextProvider: FC = ({ children }) => {
         event: string;
         data: unknown;
       };
+      console.log({ event });
       if (event.event === "get-value") {
         const { key, value } = event.data as {
           key: "userId" | "sessionId";
@@ -79,6 +82,8 @@ const ScreenContextProvider: FC = ({ children }) => {
         setSelection(event.data as TransformOutput);
       } else if (event.event === "preview-export") {
         setPreview(event.data as Variant[]);
+      } else if (event.event === "loading") {
+        setIsLoading(event.data as boolean);
       }
     };
 
@@ -86,7 +91,11 @@ const ScreenContextProvider: FC = ({ children }) => {
     emit("get-value", { key: "sessionId" });
   }, []);
 
-  const { data, isLoading, refetch } = useIsLoggedIn({
+  const {
+    data,
+    isLoading: isLoginLoading,
+    refetch,
+  } = useIsLoggedIn({
     userId,
     sessionId,
   });
@@ -95,7 +104,7 @@ const ScreenContextProvider: FC = ({ children }) => {
     refetch();
   }, [userId, sessionId]);
 
-  if (isLoading) {
+  if (isLoginLoading) {
     return <Loader />;
   }
 
@@ -109,6 +118,7 @@ const ScreenContextProvider: FC = ({ children }) => {
   return (
     <screenContext.Provider
       value={{
+        isLoading,
         isError,
         setIsError,
         lockedSelection,
