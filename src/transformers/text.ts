@@ -37,15 +37,15 @@ class FigmaTextNodeToTextContainer {
       autoFitSizes: [0, 0],
       serializedText: this.data.node.characters,
       fontMetaData: { fontId: "", fontUrl: "" },
-      objectPosition: figmaAlignMentsToObjectPosition(
-        this.data.node.textAlignHorizontal,
-        this.data.node.textAlignVertical
-      ),
+      objectPosition: "custom",
       textleft: 0,
       textTop: 0,
       textHeight: 0,
       text: this.data.node.characters,
-      textAlign: "",
+      textAlign: figmaAlignMentsToObjectPosition(
+        this.data.node.textAlignHorizontal,
+        this.data.node.textAlignVertical
+      ),
       styles: [],
       wordStyle: baseStyleAndRuns.finalSegments,
     };
