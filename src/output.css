@@ -1114,12 +1114,12 @@ video {
   font-weight: 500;
 }
 
-.font-semibold {
-  font-weight: 600;
-}
-
 .font-normal {
   font-weight: 400;
+}
+
+.font-semibold {
+  font-weight: 600;
 }
 
 .uppercase {
@@ -1153,6 +1153,11 @@ video {
   color: rgb(138 63 252 / var(--tw-text-opacity));
 }
 
+.text-brand700 {
+  --tw-text-opacity: 1;
+  color: rgb(116 42 233 / var(--tw-text-opacity));
+}
+
 .text-gray-700 {
   --tw-text-opacity: 1;
   color: rgb(55 65 81 / var(--tw-text-opacity));
@@ -1176,11 +1181,6 @@ video {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
-}
-
-.text-brand700 {
-  --tw-text-opacity: 1;
-  color: rgb(116 42 233 / var(--tw-text-opacity));
 }
 
 .underline {

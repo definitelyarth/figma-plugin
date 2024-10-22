@@ -14,7 +14,7 @@ class FigmaFrameToRktmSize {
   constructor(private node: FrameNode, private ctx: Context) {
     this.annotations = [];
     this.objects = {};
-    this.z = 1;
+    this.z = 0;
   }
 
   async recurse({

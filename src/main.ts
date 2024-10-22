@@ -1,7 +1,6 @@
 import { on, showUI } from "@create-figma-plugin/utilities";
-import { Size, Variant } from "./types";
+import { Variant } from "./types";
 import exportToRPF from "./transformers";
-import { TransformOutput } from "./transformers/types";
 import { RocketiumPortableFormat } from "rocketium-types";
 
 export default function () {
@@ -21,6 +20,7 @@ export default function () {
             figma.currentPage.name,
             figma.currentPage.selection
           );
+          console.log({ output });
           figma.ui.postMessage({ event: "selection", data: output });
           figma.ui.postMessage({ event: "loading", data: false });
         } catch (e) {

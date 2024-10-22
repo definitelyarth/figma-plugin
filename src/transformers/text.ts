@@ -48,6 +48,7 @@ class FigmaTextNodeToTextContainer {
       ),
       styles: [],
       wordStyle: baseStyleAndRuns.finalSegments,
+      fill: "rgba(0,0,0,0)",
     };
     annotations.push(...baseNodeResult.annotations);
     annotations.forEach((a) => {
@@ -130,7 +131,7 @@ class FigmaTextNodeToTextContainer {
       fontSize,
       fontFamily: fontFamily.family,
       fontWeight: String(fontWeight),
-      fill: sFills.length > 0 ? sFills[0] : "rgba(0, 0, 0, 0)",
+      fill: sFills.length > 0 ? sFills[0] : "rgba(0,0,0,0)",
       textDecoration,
       fontStyle:
         fontFamily.style.split(" ")[1]?.toLowerCase() === "italic"
