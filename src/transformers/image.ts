@@ -50,6 +50,11 @@ class FigmaImageToImageContainer {
         bytes,
       });
     }
+    if (this.data.fill.scaleMode === "TILE")
+      annotations.push({
+        message: "Unsupported scaleMode: TILE. Usinng fill",
+        type: "error",
+      });
     const imageContainer: ImageContainerJSON = {
       ...baseElement.data.baseElement,
       id: this.data.fill.imageHash as string,
