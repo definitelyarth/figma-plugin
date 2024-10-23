@@ -9,6 +9,7 @@ import Loader from "./components/Loader";
 import { emit } from "@create-figma-plugin/utilities";
 import { downloadRktm } from "./utils/download";
 import AlertOctagon from "./icons/AlertOctagon";
+import ProgressBar from "./components/ProgressBar";
 
 const MainUI = () => {
   const {
@@ -19,6 +20,7 @@ const MainUI = () => {
     nextStep,
     isError,
     isLoading,
+    uploadProgress,
   } = useScreenContext();
   const { mutateAsync, isLoading: isPopulateLoading } =
     useMutatePopulateImages();
@@ -30,7 +32,18 @@ const MainUI = () => {
       }
     >
       <Header />
-      {isLoading ? (
+      {isPopulateLoading ? (
+        <div
+          className={
+            "flex flex-col w-full h-full p-20 items-center justify-center gap-2"
+          }
+        >
+          <h1 className={"text-xs font-normal text-neutral-900"}>
+            Preparing frames for export
+          </h1>
+          <ProgressBar progress={uploadProgress} />
+        </div>
+      ) : isLoading && currStep == 0 ? (
         <div
           className={
             "flex flex-col w-full h-full p-2 text-black animate-pulse items-center justify-center"

@@ -9,20 +9,25 @@ import { roundFloatsToInts } from "../utils/numbers";
 import { RocketiumPortableFormat } from "rocketium-types";
 
 const useMutatePopulateImages = () => {
-  const { userId, sessionId, setFinalDoc, setIsError } = useScreenContext();
+  const { userId, sessionId, setFinalDoc, setIsError, setUploadProgress } =
+    useScreenContext();
   return useMutation({
     mutationFn: async ({ data }: { data: TransformOutput }) => {
       if (!userId || !sessionId) return;
+      setUploadProgress(1);
+      const total = data.ctx.images.length;
+      let count = 0;
       const uploadImagesPromise = data.ctx.images.map(async (obj) => {
         const key = await uploadFileToS3({
           userId,
           sessionId,
           imageBytes: obj.bytes,
         });
+        count++;
+        setUploadProgress((count / total) * 100);
         return { hash: obj.hash, uploadedUrl: key };
       });
       const storage = await Promise.all(uploadImagesPromise);
-      console.log({ storage });
       storage.forEach(({ hash, uploadedUrl }) => {
         if (!hash) return;
         data.rpf.variants.forEach((variant) => {
@@ -90,7 +95,6 @@ const useMutateLogout = () => {
 };
 
 const useMutateLogin = () => {
-  const { setIsError } = useScreenContext();
   return useMutation({
     mutationFn: async ({
       email,
@@ -131,18 +135,13 @@ const useMutateLogin = () => {
         user: { _id: string };
         sessionId: string;
       };
-
-      if (json.message !== "successful") {
-        throw new Error("Unsuccesful signup");
+      console.log({ json });
+      if (json.user) {
+        emit("set-value", { key: "userId", value: json.user._id });
+        emit("set-value", { key: "sessionId", value: json.sessionId });
       }
 
-      emit("set-value", { key: "userId", value: json.user._id });
-      emit("set-value", { key: "sessionId", value: json.sessionId });
-
       return json;
-    },
-    onError: (e) => {
-      setIsError(true);
     },
   });
 };

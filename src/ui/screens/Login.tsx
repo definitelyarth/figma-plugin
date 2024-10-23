@@ -11,8 +11,10 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { isLoading, mutateAsync, error, isError } = useMutateLogin();
-
+  const [loginState, setLoginState] = useState<"idle" | "success" | "error">(
+    "idle"
+  );
+  const { mutateAsync, error, isError, status } = useMutateLogin();
   return (
     <div
       class={
@@ -20,7 +22,6 @@ const Login = () => {
       }
     >
       <div className={"flex flex-col justify-center min-h-full gap-8"}>
-        {isError && error}
         <div className="flex flex-col gap-2">
           <h1 className={"text-3xl font-semibold text-black"}>Welcome back!</h1>
           <h3 className={"text-lightGray text-xs"}>
@@ -31,8 +32,11 @@ const Login = () => {
           className={"flex flex-col gap-6 text-black"}
           onSubmit={async (e) => {
             e.preventDefault();
-            if (isLoading) return;
-            await mutateAsync({ email, password });
+            if (status === "loading") return;
+            const response = await mutateAsync({ email, password });
+            setLoginState(
+              response.message === "successful" ? "success" : "error"
+            );
             nextStep();
           }}
         >
@@ -41,7 +45,9 @@ const Login = () => {
               Email
             </label>
             <TextInput
-              disabled={isLoading}
+              type={"email"}
+              required
+              disabled={status === "loading"}
               id={"email"}
               placeholder={"Enter your email"}
               className={"w-full"}
@@ -52,7 +58,7 @@ const Login = () => {
           </div>
           <div className="flex flex-col gap-1">
             <div className={"flex justify-between w-full items-center"}>
-              <label htmlFor="password" className={"text-xs"}>
+              <label htmlFor="password" className={`text-xs`}>
                 Password
               </label>
               <a
@@ -65,16 +71,27 @@ const Login = () => {
               </a>
             </div>
             <TextInput
-              disabled={isLoading}
+              required
+              type={"password"}
+              disabled={status === "loading"}
               id={"password"}
               placeholder={"Enter your password"}
-              className={"w-full"}
+              className={`w-full ${loginState === "error" && "border-red-500"}`}
               onChange={(e) => {
                 setPassword(e.currentTarget.value);
               }}
+              onFocus={() => {
+                if (loginState === "error") setLoginState("idle");
+              }}
+              state={loginState === "error" ? "error" : "normal"}
             />
+            {loginState === "error" && (
+              <span className={"text-red-500"}>
+                Incorrect username or password
+              </span>
+            )}
           </div>
-          <Button disabled={isLoading} type={"submit"}>
+          <Button disabled={status === "loading"} type={"submit"}>
             Continue
           </Button>
         </form>

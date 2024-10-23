@@ -26,6 +26,8 @@ type ScreenContextT = {
   isError: boolean;
   setIsError: Dispatch<SetStateAction<boolean>>;
   isLoading: boolean;
+  uploadProgress: number;
+  setUploadProgress: Dispatch<SetStateAction<number>>;
 };
 
 const screenContext = createContext<ScreenContextT>({
@@ -44,9 +46,12 @@ const screenContext = createContext<ScreenContextT>({
   isError: false,
   setIsError: () => {},
   isLoading: false,
+  uploadProgress: 0,
+  setUploadProgress: () => {},
 });
 
 const ScreenContextProvider: FC = ({ children }) => {
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selection, setSelection] = useState<undefined | TransformOutput>();
@@ -118,6 +123,8 @@ const ScreenContextProvider: FC = ({ children }) => {
   return (
     <screenContext.Provider
       value={{
+        uploadProgress,
+        setUploadProgress,
         isLoading,
         isError,
         setIsError,
