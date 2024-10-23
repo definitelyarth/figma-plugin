@@ -70,7 +70,7 @@ const MainUI = () => {
         ) : (
           <Button
             disabled={
-              (selection === undefined && finalDoc === undefined) ||
+              (selection === undefined && finalDoc === null) ||
               isLoading ||
               isError ||
               isPopulateLoading

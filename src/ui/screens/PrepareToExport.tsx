@@ -73,7 +73,7 @@ const PrepareToExport = () => {
                                 <AlertTriangle />
                               )}{" "}
                             </span>
-                            {a.element?.name}: {a.message}
+                            {a.message}
                           </div>
                         );
                       })

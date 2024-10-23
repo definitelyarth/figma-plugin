@@ -23,7 +23,7 @@ class FigmaFrameToRktmSize {
     yOffset,
     isTopLevelFrame,
   }: {
-    node: FrameNode | GroupNode;
+    node: FrameNode | GroupNode | InstanceNode;
     xOffset: number;
     yOffset: number;
     isTopLevelFrame?: boolean;
@@ -74,7 +74,7 @@ class FigmaFrameToRktmSize {
       };
     }
     for await (const n of node.children) {
-      if (n.type === "FRAME") {
+      if (n.type === "FRAME" || n.type === "INSTANCE") {
         await this.recurse({
           node: n,
           xOffset: xOffset + n.x,

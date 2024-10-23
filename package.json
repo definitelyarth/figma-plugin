@@ -39,7 +39,7 @@
       "figma"
     ],
     "id": "rocketium",
-    "name": "Figma.to.Rocketium | Export figma assets in .Rktm",
+    "name": "Figma To Rocketium",
     "main": "src/main.ts",
     "ui": "src/ui.tsx",
     "networkAccess": {

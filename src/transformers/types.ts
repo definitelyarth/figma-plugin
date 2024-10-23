@@ -41,10 +41,6 @@ export type AnnotationType = "info" | "error";
 export type Annotation = {
   message: string;
   type: AnnotationType;
-  element?: {
-    id: string;
-    name: string;
-  };
 };
 
 export type Size = {

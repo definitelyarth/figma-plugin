@@ -2,6 +2,7 @@ import { ImageContainerJSON } from "rocketium-types";
 import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
 import { ObjectFit } from "rocketium-types/dist/ImageContainerTypes";
 import { Annotation, Context, WithAnnotations } from "./types";
+import { generateObjectId } from "src/utils/ID";
 
 class FigmaImageToImageContainer {
   constructor(
@@ -25,9 +26,9 @@ class FigmaImageToImageContainer {
       supportImage: true,
     });
     annotations.push(...baseElement.annotations);
-    const storedObj = this.data.ctx.images.find(
-      (e) => e.hash === this.data.fill.imageHash
-    );
+    let imageId = this.data.fill.imageHash;
+    if (!imageId) imageId = generateObjectId();
+    const storedObj = this.data.ctx.images.find((e) => e.hash === imageId);
     if (storedObj) {
       storedObj.nodeIds.push(this.data.node.id);
     } else {
@@ -45,7 +46,7 @@ class FigmaImageToImageContainer {
       if (!bytes) bytes = await this.data.node.exportAsync({ format: "PNG" });
       this.data.ctx.images.push({
         nodeIds: [this.data.node.id],
-        hash: this.data.fill.imageHash,
+        hash: imageId,
         isRealHash: true,
         bytes,
       });
@@ -57,14 +58,14 @@ class FigmaImageToImageContainer {
       });
     const imageContainer: ImageContainerJSON = {
       ...baseElement.data.baseElement,
-      id: this.data.fill.imageHash as string,
+      id: imageId as string,
       type: "image-container",
       dataType: "IMAGE",
       src: this.data.fill.imageHash as string,
       objectPosition: "custom",
       imageScale: this.data.fill.scalingFactor as number,
-      imageLeft: this.data.xOffset + this.data.node.x,
-      imageTop: this.data.yOffset + this.data.node.y,
+      imageLeft: 0,
+      imageTop: 0,
       imageWidth: 0,
       imageHeight: 0,
       objectFit:
@@ -72,9 +73,7 @@ class FigmaImageToImageContainer {
           ? "fill"
           : (this.data.fill.scaleMode.toLowerCase() as ObjectFit),
     };
-    annotations.forEach((a) => {
-      a.element = { id: this.data.node.id, name: this.data.name };
-    });
+
     return { annotations, data: imageContainer };
   }
 }

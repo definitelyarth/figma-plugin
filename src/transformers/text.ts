@@ -51,9 +51,6 @@ class FigmaTextNodeToTextContainer {
       fill: "rgba(0,0,0,0)",
     };
     annotations.push(...baseNodeResult.annotations);
-    annotations.forEach((a) => {
-      a.element = { id: this.data.node.id, name: this.data.name };
-    });
     return { data: textContainer, annotations };
   }
 

@@ -32,9 +32,6 @@ class FigmaRectangleToRoundedRect {
       dataType: "SHAPE",
     };
     annotations.push(...baseNodeResult.annotations);
-    annotations.forEach((a) => {
-      a.element = { id: this.data.node.id, name: this.data.name };
-    });
     return { data: roundedRect, annotations };
   }
 }

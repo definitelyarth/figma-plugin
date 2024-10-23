@@ -1,6 +1,6 @@
 import { RocketiumPortableFormat } from "rocketium-types";
 import FigmaFrameToRktmSize from "./frame";
-import { ClusterVariant, Context, TransformOutput } from "./types";
+import { Annotation, ClusterVariant, Context, TransformOutput } from "./types";
 import { clustersToCanvases, clusterVariants } from "src/clustering";
 
 const exportToRPF = async (
@@ -14,13 +14,17 @@ const exportToRPF = async (
     if (frameNode.type !== "FRAME" || !frameNode.visible) continue;
     const transformer = new FigmaFrameToRktmSize(frameNode, ctx);
     const variant = await transformer.export();
+    const uniqueArray = Array.from(
+      new Set(transformer.annotations.map((obj) => JSON.stringify(obj)))
+    ).map((str) => JSON.parse(str) as Annotation);
     frames[frameNode.id] = {
-      annotations: transformer.annotations,
+      annotations: uniqueArray,
       name: frameNode.name,
       id: frameNode.id,
     };
     vars.push(variant);
   }
+
   const clusters = clusterVariants(vars);
   const canvases = clustersToCanvases(clusters);
   const rpf: RocketiumPortableFormat = {

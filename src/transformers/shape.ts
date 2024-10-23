@@ -38,9 +38,6 @@ class FigmaShapeToPath {
       path: _2dPaths,
     };
     annotations.push(...baseNodeResult.annotations);
-    annotations.forEach((a) => {
-      a.element = { id: this.data.node.id, name: this.data.name };
-    });
     return { data: path, annotations };
   }
 

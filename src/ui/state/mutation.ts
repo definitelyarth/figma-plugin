@@ -5,13 +5,14 @@ import { TransformOutput } from "src/transformers/types";
 import { useScreenContext } from "../contexts/ScreenContext";
 import { uploadFileToS3 } from "src/storage/s3";
 import { generateObjectId } from "src/utils/ID";
+import { roundFloatsToInts } from "../utils/numbers";
+import { RocketiumPortableFormat } from "rocketium-types";
 
 const useMutatePopulateImages = () => {
   const { userId, sessionId, setFinalDoc, setIsError } = useScreenContext();
   return useMutation({
     mutationFn: async ({ data }: { data: TransformOutput }) => {
       if (!userId || !sessionId) return;
-
       const uploadImagesPromise = data.ctx.images.map(async (obj) => {
         const key = await uploadFileToS3({
           userId,
@@ -21,17 +22,23 @@ const useMutatePopulateImages = () => {
         return { hash: obj.hash, uploadedUrl: key };
       });
       const storage = await Promise.all(uploadImagesPromise);
+      console.log({ storage });
       storage.forEach(({ hash, uploadedUrl }) => {
         if (!hash) return;
         data.rpf.variants.forEach((variant) => {
           const object = variant.variant.objects[hash];
           if (!object) return;
-          if (object.type === "image-container" && object.dataType === "IMAGE")
+          if (
+            object.type === "image-container" &&
+            object.dataType === "IMAGE"
+          ) {
             object.src = uploadedUrl;
+          }
         });
       });
       const forPreview = data.rpf;
-      const finalDoc = window.structuredClone(data.rpf);
+      let finalDoc = window.structuredClone(data.rpf);
+      finalDoc = roundFloatsToInts(finalDoc) as RocketiumPortableFormat;
       const objectKeysMap: Record<string, string> = {};
       finalDoc.variants.forEach((variant) => {
         for (const key of Object.keys(variant.variant.sizes)) {
