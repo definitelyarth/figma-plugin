@@ -19,5 +19,5 @@ export default {
     },
   },
   plugins: [],
-  darkMode: ["class", ".figma-dark"],
+  // darkMode: ["class", ".figma-dark"],
 };
