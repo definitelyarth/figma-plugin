@@ -8,6 +8,7 @@ import CheckIcon from "../icons/CheckIcon";
 import AlertOctagon from "../icons/AlertOctagon";
 import AlertTriangle from "../icons/AlertTriangle";
 import FrameIcon from "../icons/FrameIcon";
+import ExternalIcon from "../icons/ExternalIcon";
 
 const PrepareToExport = () => {
   const { selection } = useScreenContext();
@@ -63,17 +64,32 @@ const PrepareToExport = () => {
                       frame.annotations.map((a, idx) => {
                         return (
                           <div
-                            className={`flex items-center py-2`}
+                            className={
+                              "flex items-center w-full gap-4 justify-between"
+                            }
                             style={{ borderTopWidth: `${idx !== 0 ? 1 : 0}` }}
                           >
-                            <span className={"px-4"}>
-                              {a.type === "error" ? (
-                                <AlertOctagon />
-                              ) : (
-                                <AlertTriangle />
-                              )}{" "}
-                            </span>
-                            {a.message}
+                            <div
+                              className={`flex items-center py-2 text-wrap max-w-72`}
+                            >
+                              <span className={"px-4"}>
+                                {a.type === "error" ? (
+                                  <AlertOctagon />
+                                ) : (
+                                  <AlertTriangle />
+                                )}{" "}
+                              </span>
+                              {a.message}
+                            </div>
+                            <a
+                              className={
+                                "justify-self-end flex gap-4 text-brand items-center"
+                              }
+                              target={"_blank"}
+                              href={"https://rocketium.com"}
+                            >
+                              <ExternalIcon /> Read More
+                            </a>
                           </div>
                         );
                       })

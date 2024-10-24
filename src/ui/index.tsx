@@ -72,7 +72,8 @@ const MainUI = () => {
         }
       >
         <a
-          href=""
+          href="https://rocketium.com"
+          target={"_blank"}
           className={"text-brand flex gap-1 items-center font-semibold"}
         >
           <ExternalIcon />
