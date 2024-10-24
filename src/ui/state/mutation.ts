@@ -15,7 +15,7 @@ const useMutatePopulateImages = () => {
     mutationFn: async ({ data }: { data: TransformOutput }) => {
       if (!userId || !sessionId) return;
       setUploadProgress(1);
-      const total = data.ctx.images.length;
+      const total = data.ctx.images.length + data.rpf.variants.length;
       let count = 0;
       const uploadImagesPromise = data.ctx.images.map(async (obj) => {
         const key = await uploadFileToS3({
@@ -26,6 +26,22 @@ const useMutatePopulateImages = () => {
         count++;
         setUploadProgress((count / total) * 100);
         return { hash: obj.hash, uploadedUrl: key };
+      });
+      const uploadPreviewsPromise = data.rpf.variants.map(
+        async (variant, idx) => {
+          const key = await uploadFileToS3({
+            userId,
+            sessionId,
+            imageBytes: variant.metadata.thumbnailUrl as unknown as Uint8Array,
+          });
+          count++;
+          setUploadProgress((count / total) * 100);
+          return { idx, uploadedUrl: key };
+        }
+      );
+      const uploadedPreviews = await Promise.all(uploadPreviewsPromise);
+      uploadedPreviews.forEach(({ idx, uploadedUrl }) => {
+        data.rpf.variants[idx].metadata.thumbnailUrl = uploadedUrl;
       });
       const storage = await Promise.all(uploadImagesPromise);
       storage.forEach(({ hash, uploadedUrl }) => {

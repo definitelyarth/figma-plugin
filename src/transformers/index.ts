@@ -35,9 +35,21 @@ const exportToRPF = async (
       schemaVersion: "1",
       sourceVersion: "1",
     },
-    variants: canvases.map((d) => {
-      return { variant: d.variant, metadata: {} };
-    }),
+    variants: await Promise.all(
+      canvases.map(async (d) => {
+        const sizeKey = Object.keys(d.variant.sizes)[0];
+        const frameId = d.variant.sizes[sizeKey].id;
+        const node = await figma.getNodeByIdAsync(frameId);
+        let preview: Uint8Array | undefined;
+        if (node && node.type === "FRAME") {
+          preview = await node.exportAsync({ format: "PNG" });
+        }
+        return {
+          variant: d.variant,
+          metadata: { thumbnailUrl: preview as unknown as string },
+        };
+      })
+    ),
   };
   return { rpf, ctx, frames };
 };
