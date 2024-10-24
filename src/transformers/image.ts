@@ -3,6 +3,7 @@ import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
 import { ObjectFit } from "rocketium-types/dist/ImageContainerTypes";
 import { Annotation, Context, WithAnnotations } from "./types";
 import { generateObjectId } from "src/utils/ID";
+import { figmaTransformMatrixToTranslateAndRotation } from "./utils/layout";
 
 class FigmaImageToImageContainer {
   constructor(
@@ -56,6 +57,9 @@ class FigmaImageToImageContainer {
         message: "Unsupported scaleMode: TILE. Usinng fill",
         type: "error",
       });
+    const translateAndRotation =
+      this.data.fill.imageTransform &&
+      figmaTransformMatrixToTranslateAndRotation(this.data.fill.imageTransform);
     const imageContainer: ImageContainerJSON = {
       ...baseElement.data.baseElement,
       id: imageId as string,
@@ -64,8 +68,8 @@ class FigmaImageToImageContainer {
       src: this.data.fill.imageHash as string,
       objectPosition: "custom",
       imageScale: this.data.fill.scalingFactor as number,
-      imageLeft: 0,
-      imageTop: 0,
+      imageLeft: translateAndRotation?.position.x || 0,
+      imageTop: translateAndRotation?.position.y || 0,
       imageWidth: 0,
       imageHeight: 0,
       objectFit:

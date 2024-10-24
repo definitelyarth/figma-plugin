@@ -4,6 +4,10 @@ function roundFloatsToInts(obj: unknown): unknown {
   } else if (typeof obj === "object" && obj !== null) {
     const newObj: Record<string, unknown> = {};
     for (const key in obj) {
+      if (key == "opacity") {
+        newObj[key] = (obj as Record<string, unknown>)[key];
+        continue;
+      }
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         newObj[key] = roundFloatsToInts((obj as Record<string, unknown>)[key]);
       }
@@ -16,4 +20,8 @@ function roundFloatsToInts(obj: unknown): unknown {
   }
 }
 
-export { roundFloatsToInts };
+function roundTo3Decimals(n: number): number {
+  return Math.round((n + Number.EPSILON) * 1000) / 1000;
+}
+
+export { roundFloatsToInts, roundTo3Decimals };

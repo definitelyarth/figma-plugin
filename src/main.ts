@@ -114,8 +114,4 @@ export default function () {
       data: { key: data.key, value },
     });
   });
-
-  on("printSelected", () => {
-    exportToRPF("SomeName", figma.currentPage.selection);
-  });
 }

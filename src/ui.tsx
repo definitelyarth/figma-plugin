@@ -16,13 +16,13 @@ function Plugin() {
       <ScreenContextProvider>
         <MainUI />
       </ScreenContextProvider>
-      {/* <Button
+      <Button
         onClick={() => {
           emit("printSelected");
         }}
       >
         Print Selected
-      </Button> */}
+      </Button>
     </QueryClientProvider>
   );
 }
