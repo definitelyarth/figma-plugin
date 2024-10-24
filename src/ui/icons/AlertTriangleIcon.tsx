@@ -1,6 +1,7 @@
 import { h } from "preact";
+import { FC, HTMLProps } from "preact/compat";
 
-const AlertTriangleIcon = () => {
+const AlertTriangleIcon: FC<HTMLProps<SVGElement>> = ({ ...props }) => {
   return (
     <svg
       width="12"
@@ -8,6 +9,7 @@ const AlertTriangleIcon = () => {
       viewBox="0 0 12 12"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
       <g clip-path="url(#clip0_2017_6099)">
         <path

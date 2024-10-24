@@ -4,6 +4,7 @@ import { Button } from "../components/Button";
 import { useScreenContext } from "../contexts/ScreenContext";
 import { useMutateLogin } from "../state/mutation";
 import { useState } from "preact/hooks";
+import AlertTriangleIcon from "../icons/AlertTriangleIcon";
 
 const Login = () => {
   const { nextStep } = useScreenContext();
@@ -29,7 +30,7 @@ const Login = () => {
           </h3>
         </div>
         <form
-          className={"flex flex-col gap-6 text-black"}
+          className={"flex flex-col gap-6 text-black text-xs"}
           onSubmit={async (e) => {
             e.preventDefault();
             if (status === "loading") return;
@@ -70,21 +71,31 @@ const Login = () => {
                 Forgot password?
               </a>
             </div>
-            <TextInput
-              required
-              type={"password"}
-              disabled={status === "loading"}
-              id={"password"}
-              placeholder={"Enter your password"}
-              className={`w-full ${loginState === "error" && "border-red-500"}`}
-              onChange={(e) => {
-                setPassword(e.currentTarget.value);
-              }}
-              onFocus={() => {
-                if (loginState === "error") setLoginState("idle");
-              }}
-              state={loginState === "error" ? "error" : "normal"}
-            />
+            <div className={"relative w-full"}>
+              <TextInput
+                required
+                type={"password"}
+                disabled={status === "loading"}
+                id={"password"}
+                placeholder={"Enter your password"}
+                className={`w-full ${
+                  loginState === "error" && "border-red-500"
+                }`}
+                onChange={(e) => {
+                  setPassword(e.currentTarget.value);
+                }}
+                onFocus={() => {
+                  if (loginState === "error") setLoginState("idle");
+                }}
+                state={loginState === "error" ? "error" : "normal"}
+              />
+              {loginState === "error" && (
+                <AlertTriangleIcon
+                  className={"absolute right-4"}
+                  style={{ top: 13 }}
+                />
+              )}
+            </div>
             {loginState === "error" && (
               <span className={"text-red-500"}>
                 Incorrect username or password
