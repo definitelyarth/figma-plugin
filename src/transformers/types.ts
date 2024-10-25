@@ -27,7 +27,12 @@ export type Context = {
   }[];
 };
 
-export type FigmaBaseNode = TextNode | ShapeNode | FrameNode | RectangleNode;
+export type FigmaBaseNode =
+  | TextNode
+  | ShapeNode
+  | FrameNode
+  | RectangleNode
+  | InstanceNode;
 
 export type Variant = {
   id: string;

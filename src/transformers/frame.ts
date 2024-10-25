@@ -21,12 +21,10 @@ class FigmaFrameToRktmSize {
     node,
     xOffset,
     yOffset,
-    isTopLevelFrame,
   }: {
     node: FrameNode | GroupNode | InstanceNode;
     xOffset: number;
     yOffset: number;
-    isTopLevelFrame?: boolean;
   }) {
     if (node.type === "FRAME" && typeof node.fills === "object") {
       for await (const fill of node.fills) {
@@ -48,31 +46,7 @@ class FigmaFrameToRktmSize {
         }
       }
     }
-    if (
-      !isTopLevelFrame &&
-      node.type === "FRAME" &&
-      typeof node.fills !== "symbol" &&
-      node.fills.findIndex(
-        (paint) =>
-          paint.type === "SOLID" ||
-          paint.type === "GRADIENT_LINEAR" ||
-          paint.type === "GRADIENT_RADIAL"
-      ) !== -1 &&
-      node.visible
-    ) {
-      const vector = new FigmaRectangleToRoundedRect({
-        node: node,
-        xOffset: xOffset - node.x,
-        yOffset: yOffset - node.y,
-        name: this.node.name,
-      });
-      const rect = vector.transform();
-      this.objects[rect.data.id] = {
-        ...rect.data,
-        zIndex: ++this.z,
-        overrides: {},
-      };
-    }
+
     for await (const n of node.children) {
       if (n.type === "FRAME" || n.type === "INSTANCE") {
         await this.recurse({
@@ -207,7 +181,6 @@ class FigmaFrameToRktmSize {
       node: this.node,
       xOffset: 0,
       yOffset: 0,
-      isTopLevelFrame: true,
     });
 
     return {

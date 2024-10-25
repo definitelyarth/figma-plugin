@@ -1,9 +1,13 @@
 import { TextContainerJSON, TextStyle, WordStyle } from "rocketium-types";
-import { Annotation, WithAnnotations } from "./types";
+import { Annotation, FigmaBaseNode, WithAnnotations } from "./types";
 import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
 import { TextStyles } from "./types";
 import { figmaAlignMentsToObjectPosition } from "./utils/layout";
 import { figmaPaintsToRktmFills } from "./utils/colors";
+import { SerializedFillType } from "rocketium-types/dist/ColorTypes";
+import { Border } from "rocketium-types/dist/ObjectContainerTypes";
+import { FigmaBaseNodeToBorder } from "./utils/styles";
+import { Radius } from "rocketium-types/dist/RoundedRectTypes";
 
 class FigmaTextNodeToTextContainer {
   constructor(
@@ -24,6 +28,33 @@ class FigmaTextNodeToTextContainer {
       node: this.data.node,
       displayText: this.data.name,
     });
+
+    let parentFill: SerializedFillType = "rgba(0,0,0,0)";
+    let border: Border = baseNodeResult.data.baseElement.border;
+    let cornerRadius: Radius = {};
+    const parent = this.data.node.parent;
+    if (
+      parent &&
+      (parent.type === "FRAME" ||
+        parent.type === "INSTANCE" ||
+        parent.type === "COMPONENT")
+    ) {
+      if (typeof parent.fills === "object") {
+        const parentFills = figmaPaintsToRktmFills(parent.fills);
+        parentFill =
+          parentFills.data.fills.length > 0
+            ? parentFills.data.fills[0]
+            : "rgba(0,0,0,0)";
+      }
+      const borderData = FigmaBaseNodeToBorder(parent as FigmaBaseNode);
+      border = borderData.data.border;
+      cornerRadius = {
+        bl: parent.bottomLeftRadius,
+        br: parent.bottomRightRadius,
+        tl: parent.topLeftRadius,
+        tr: parent.topRightRadius,
+      };
+    }
 
     const baseStyleAndRuns = this.figmaBaseStyleAndOverrides(this.data.node);
 
@@ -48,7 +79,9 @@ class FigmaTextNodeToTextContainer {
       ),
       styles: [],
       wordStyle: baseStyleAndRuns.finalSegments,
-      fill: "rgba(0,0,0,0)",
+      fill: parentFill,
+      border,
+      cornerRadius,
     };
     annotations.push(...baseNodeResult.annotations);
     return { data: textContainer, annotations };

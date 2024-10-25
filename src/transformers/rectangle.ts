@@ -5,7 +5,7 @@ import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
 class FigmaRectangleToRoundedRect {
   constructor(
     private data: {
-      node: RectangleNode | FrameNode;
+      node: RectangleNode | FrameNode | InstanceNode;
       name: string;
       xOffset: number;
       yOffset: number;

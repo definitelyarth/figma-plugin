@@ -85,9 +85,7 @@ const clustersToCanvases = (clusters: ClusterVariant[][]) => {
                 ];
             }
           }
-          if (!("zIndex" in diff)) {
-            diff.zIndex = size.objects[objectKey].zIndex;
-          }
+          diff.zIndex = baseObject.zIndex;
           baseObject["overrides"][size.id] =
             diff as Partial<CanvasElementJSON> & { zIndex: number };
         } else {
