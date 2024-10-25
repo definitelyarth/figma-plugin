@@ -72,7 +72,6 @@ const ScreenContextProvider: FC = ({ children }) => {
         event: string;
         data: unknown;
       };
-      console.log({ event });
       if (event.event === "get-value") {
         const { key, value } = event.data as {
           key: "userId" | "sessionId";

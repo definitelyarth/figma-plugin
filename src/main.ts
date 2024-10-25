@@ -20,7 +20,7 @@ export default function () {
             figma.currentPage.name,
             figma.currentPage.selection
           );
-          console.log({ output });
+
           figma.ui.postMessage({ event: "selection", data: output });
           figma.ui.postMessage({ event: "loading", data: false });
         } catch (e) {

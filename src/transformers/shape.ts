@@ -1,4 +1,4 @@
-import { PathJSON, RoundedRectJSON } from "rocketium-types";
+import { PathJSON } from "rocketium-types";
 import { Annotation, ShapeNode, WithAnnotations } from "./types";
 import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
 

@@ -151,7 +151,6 @@ const useMutateLogin = () => {
         user: { _id: string };
         sessionId: string;
       };
-      console.log({ json });
       if (json.user) {
         emit("set-value", { key: "userId", value: json.user._id });
         emit("set-value", { key: "sessionId", value: json.sessionId });
