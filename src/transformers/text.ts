@@ -1,7 +1,7 @@
 import { TextContainerJSON, TextStyle, WordStyle } from "rocketium-types";
 import { Annotation, WithAnnotations } from "./types";
 import { FigmaBaseNodeToRpfBaseElement } from "./baseNode";
-import { TextStyles } from "src/types";
+import { TextStyles } from "./types";
 import { figmaAlignMentsToObjectPosition } from "./utils/layout";
 import { figmaPaintsToRktmFills } from "./utils/colors";
 

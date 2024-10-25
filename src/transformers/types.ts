@@ -59,3 +59,35 @@ export type TransformOutput = {
     { annotations: Annotation[]; name: string; id: string }
   >;
 };
+
+export const TextStyles: (
+  | "fontSize"
+  | "fontName"
+  | "fontWeight"
+  | "textDecoration"
+  | "textCase"
+  | "lineHeight"
+  | "letterSpacing"
+  | "fills"
+  | "textStyleId"
+  | "fillStyleId"
+  | "listOptions"
+  | "indentation"
+  | "hyperlink"
+  | "openTypeFeatures"
+)[] = [
+  "fontSize",
+  "fontName",
+  "fontWeight",
+  "textDecoration",
+  "textCase",
+  "lineHeight",
+  "letterSpacing",
+  "fills",
+  "textStyleId",
+  "fillStyleId",
+  "listOptions",
+  "indentation",
+  "hyperlink",
+  "openTypeFeatures",
+];
