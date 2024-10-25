@@ -14,13 +14,6 @@ function Plugin() {
       <ScreenContextProvider>
         <MainUI />
       </ScreenContextProvider>
-      <Button
-        onClick={() => {
-          emit("printSelected");
-        }}
-      >
-        Print Selected
-      </Button>
     </QueryClientProvider>
   );
 }
