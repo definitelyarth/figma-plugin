@@ -36,7 +36,9 @@ function figmaPaintsToRktmFills(
   return { data: { fills }, annotations };
 }
 function figmaRGBAToRgbaString(rgba: RGBA): string {
-  return `rgba(${rgba.r * 255},${rgba.g * 255},${rgba.b * 255},${rgba.a || 1})`;
+  return `rgba(${Math.round(rgba.r * 255)},${Math.round(
+    rgba.g * 255
+  )},${Math.round(rgba.b * 255)},${rgba.a || 1})`;
 }
 
 function figmaGradientToRpfGradient(
