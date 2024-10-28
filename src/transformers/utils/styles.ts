@@ -50,7 +50,12 @@ const FigmaBaseNodeToBorder = (
     style: node.dashPattern.length == 0 ? "solid" : "dashed",
     dashGap: node.dashPattern.length == 0 ? 0 : node.dashPattern[1],
     dashWidth: node.dashPattern.length == 0 ? 0 : node.dashPattern[0],
-    dashCap: typeof node.strokeCap === "symbol" ? "square" : node.strokeCap,
+    dashCap:
+      typeof node.strokeCap === "symbol"
+        ? "square"
+        : node.strokeCap !== "ROUND" && node.strokeCap !== "SQUARE"
+        ? "square"
+        : node.strokeCap.toLowerCase(),
     color: borderColor,
   };
   if (node.type !== "FRAME" && node.type !== "RECTANGLE")
