@@ -26,7 +26,13 @@ class FigmaFrameToRktmSize {
     xOffset: number;
     yOffset: number;
   }) {
+    if (node.type === "INSTANCE" || node.type === "FRAME") {
+      if (node.clipsContent) {
+        this.annotations.push({type: "info", message: "Content inside frames won't be clipped."})
+      }
+    }
     if (node.type === "FRAME" && typeof node.fills === "object") {
+      
       for await (const fill of node.fills) {
         if (fill.type === "IMAGE") {
           const image = new FigmaImageToImageContainer({

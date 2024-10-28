@@ -54,9 +54,15 @@ class FigmaImageToImageContainer {
     }
     if (this.data.fill.scaleMode === "TILE")
       annotations.push({
-        message: "Unsupported scaleMode: TILE. Usinng fill",
+        message: "Tiled image scaling is not supported.",
         type: "error",
       });
+    if (this.data.fill.scaleMode === "CROP") {
+      annotations.push({
+        message: "Image crop, scale, and rotation are unsupported.",
+        type: "info"
+      })
+    }
     const translateAndRotation =
       this.data.fill.imageTransform &&
       figmaTransformMatrixToTranslateAndRotation(this.data.fill.imageTransform);

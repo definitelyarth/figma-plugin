@@ -11,8 +11,8 @@ const FigmaEffectsToRpfEffects = (
   effects.forEach((effect) => {
     if (effect.type !== "DROP_SHADOW") {
       annotations.push({
-        message: `Unsupported effect: ${effect.type}`,
-        type: "error",
+        message: `Only drop shadow is supported. Don't use inner shadows or glows.`,
+        type: "info",
       });
     } else {
       rpfEffects.push({
@@ -43,7 +43,7 @@ const FigmaBaseNodeToBorder = (
   if (colors.data.fills.findIndex((e) => typeof e !== "string") != -1) {
     annotations.push({
       type: "info",
-      message: "Only SOLID fills supported for border strokes.",
+      message: "Only solid fills work for borders.",
     });
   }
   const borderData: Border = {
@@ -58,6 +58,9 @@ const FigmaBaseNodeToBorder = (
         : node.strokeCap.toLowerCase(),
     color: borderColor,
   };
+  if (typeof node.strokeCap === "string" && node.strokeCap !== "ROUND" && node.strokeCap !== "SQUARE" && node.strokeCap !== "NONE") {
+    annotations.push({type: "info", message: "Arrow-style border caps change to square."})
+  }
   if (node.type !== "FRAME" && node.type !== "RECTANGLE")
     return { data: { border: borderData }, annotations };
 

@@ -25,10 +25,13 @@ function figmaPaintsToRktmFills(
     ) {
       fills.push(figmaGradientToRpfGradient(paint));
     } else {
-      if (paint.type === "IMAGE" && !!supportImage) return;
+      if (paint.type === "IMAGE") {
+        if (!supportImage) annotations.push({type: "info", message: "Image fills only work inside rectangle shapes or frames."})
+        return;
+      } 
       annotations.push({
-        type: "error",
-        message: `Unsupported paint: ${paint.type}`,
+        type: "info",
+        message: `Only linear and radial gradients are supported. Avoid using angular or diamond gradients.`,
       });
     }
   });
