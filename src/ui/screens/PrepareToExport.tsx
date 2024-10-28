@@ -83,7 +83,7 @@ const PrepareToExport = () => {
                             </div>
                             <a
                               className={
-                                "justify-self-end flex gap-4 text-brand items-center"
+                                "justify-self-end flex gap-4 text-brand700 items-center mr-6"
                               }
                               target={"_blank"}
                               href={"https://rocketium.com"}
