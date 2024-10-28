@@ -3,7 +3,7 @@ import TextInput from "../components/TextInput";
 import { Button } from "../components/Button";
 import { useScreenContext } from "../contexts/ScreenContext";
 import { useMutateLogin } from "../state/mutation";
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import AlertTriangleIcon from "../icons/AlertTriangleIcon";
 
 const Login = () => {
@@ -12,10 +12,13 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [loginState, setLoginState] = useState<"idle" | "success" | "error">(
+  const [loginState, setLoginState] = useState<"idle" | "success" | "error" | "bad-auth">(
     "idle"
   );
   const { mutateAsync, error, isError, status } = useMutateLogin();
+  useEffect(() => {
+    if (isError) setLoginState("error")
+  }, [isError])
   return (
     <div
       class={
@@ -36,7 +39,7 @@ const Login = () => {
             if (status === "loading") return;
             const response = await mutateAsync({ email, password });
             setLoginState(
-              response.message === "successful" ? "success" : "error"
+              response.message === "successful" ? "success" : "bad-auth"
             );
             nextStep();
           }}
@@ -85,20 +88,25 @@ const Login = () => {
                   setPassword(e.currentTarget.value);
                 }}
                 onFocus={() => {
-                  if (loginState === "error") setLoginState("idle");
+                  if (loginState === "error" || loginState === "bad-auth") setLoginState("idle");
                 }}
-                state={loginState === "error" ? "error" : "normal"}
+                state={loginState === "bad-auth" ? "error" : "normal"}
               />
-              {loginState === "error" && (
+              {loginState === "bad-auth" && (
                 <AlertTriangleIcon
                   className={"absolute right-4"}
                   style={{ top: 13 }}
                 />
               )}
             </div>
-            {loginState === "error" && (
+            {loginState === "bad-auth" && (
               <span className={"text-red-500"}>
                 Incorrect username or password
+              </span>
+            )}
+            {loginState === "error" && (
+              <span className={"text-red-500"}>
+                An error occurred.
               </span>
             )}
           </div>
