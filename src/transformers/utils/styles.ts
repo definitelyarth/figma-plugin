@@ -26,7 +26,7 @@ const FigmaEffectsToRpfEffects = (
   if (rpfEffects.length > 1)
     annotations.push({
       message: "Only one effect supported per element.",
-      type: "error",
+      type: "info",
     });
   return { annotations, data: rpfEffects[0] || null };
 };

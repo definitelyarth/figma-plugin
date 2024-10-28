@@ -55,7 +55,7 @@ class FigmaImageToImageContainer {
     if (this.data.fill.scaleMode === "TILE")
       annotations.push({
         message: "Tiled image scaling is not supported.",
-        type: "error",
+        type: "info",
       });
     if (this.data.fill.scaleMode === "CROP") {
       annotations.push({

@@ -10,6 +10,7 @@ import { FigmaBaseNodeToBorder } from "./utils/styles";
 import { Radius } from "rocketium-types/dist/RoundedRectTypes";
 
 class FigmaTextNodeToTextContainer {
+  annotations: Annotation[] = [];
   constructor(
     private data: {
       node: TextNode;
@@ -20,7 +21,6 @@ class FigmaTextNodeToTextContainer {
   ) {}
 
   transform(): WithAnnotations<TextContainerJSON> {
-    const annotations: Annotation[] = [];
 
     const baseNodeResult = FigmaBaseNodeToRpfBaseElement({
       xOffset: this.data.xOffset,
@@ -30,8 +30,9 @@ class FigmaTextNodeToTextContainer {
     });
 
     let parentFill: SerializedFillType = "rgba(0,0,0,0)";
-    let border: Border = baseNodeResult.data.baseElement.border;
+    let border: Border = {};
     let cornerRadius: Radius = {};
+    if (this.data.node.strokes.length > 0) this.annotations.push({type: "info", message: "Don't apply borders or strokes to text."})
     const parent = this.data.node.parent;
     if (
       parent &&
@@ -83,8 +84,8 @@ class FigmaTextNodeToTextContainer {
       border,
       cornerRadius,
     };
-    annotations.push(...baseNodeResult.annotations);
-    return { data: textContainer, annotations };
+    this.annotations.push(...baseNodeResult.annotations);
+    return { data: textContainer, annotations: this.annotations };
   }
 
   figamSegmentsToRktmRuns(node: TextNode) {
@@ -114,6 +115,10 @@ class FigmaTextNodeToTextContainer {
     end: number
   ): { w: WordStyle["data"]["styles"]; t: TextStyle } {
     const fontSize = node.getRangeFontSize(start, end) as number;
+    const openTypeFeatures = node.getRangeOpenTypeFeatures(start, end) as { readonly [feature in OpenTypeFeature]: boolean; }
+    if (Object.keys(openTypeFeatures).length > 0) {
+      this.annotations.push({type: "info", message: "Avoid advanced text styling"})
+    }
     const fontFamily = node.getRangeFontName(start, end) as FontName;
     const fontWeight = node.getRangeFontWeight(start, end) as number;
     const lineHeight = node.getRangeLineHeight(start, end) as LineHeight;
@@ -123,9 +128,9 @@ class FigmaTextNodeToTextContainer {
       start,
       end
     ) as TextDecoration;
+    if (textDecoration === "STRIKETHROUGH") this.annotations.push({type: "info", message: "Use only underline (no strikethrough or overlines)."})
     const textCase = node.getRangeTextCase(start, end) as TextCase;
     const charSpacing = node.getRangeLetterSpacing(start, end) as LetterSpacing;
-
     const textStyle: TextStyle = {
       fontSize,
       fontFamily: fontFamily.family,

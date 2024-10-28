@@ -44,7 +44,7 @@ function FigmaBlendModeToRpfGlobalCompositeOperation(
     annotations: [
       {
         message: `Unsupported blend mode: ${blendMode}. Using NORMAL`,
-        type: "error",
+        type: "info",
       },
     ],
   };
